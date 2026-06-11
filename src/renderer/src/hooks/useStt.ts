@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { ttsPlaying } from '../lib/ttsGate'
+import { isLikelyEcho } from '../lib/echoFilter'
 
 const STT_URL = 'ws://127.0.0.1:8765'
 
@@ -90,6 +91,8 @@ export function useStt(stream: MediaStream | null, options?: SttOptions): SttSta
         const msg = JSON.parse(e.data as string)
         if (msg.type === 'ready') setStatus('ready')
         else if (msg.type === 'final' && msg.text) {
+          // O'z TTS ovozimizning qaytishi bo'lsa — e'tiborsiz qoldiramiz (loop himoyasi)
+          if (isLikelyEcho(msg.text)) return
           const line: SubtitleLine = { id: nextId.current++, src: msg.text, dst: null, dstError: null }
           setLines((prev) => [...prev.slice(-19), line])
           translateLine(line.id, line.src)

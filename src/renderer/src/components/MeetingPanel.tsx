@@ -204,6 +204,15 @@ export function MeetingPanel(): React.JSX.Element {
 
       {(micError || error) && <p className="error">{micError ?? error}</p>}
 
+      {!settings.meeting.outputDeviceId && (
+        <p className="stage-error">
+          ⚠️ TTS hozir oddiy kolonkaga chiqadi — bu aks-sado (loop) xavfini tugʻdiradi va
+          suhbatdosh tarjimani faqat mikrofoningiz orqali eshitadi. Toza ishlashi uchun{' '}
+          <b>VB-Cable</b> oʻrnatib, «TTS chiqishi»da <b>CABLE Input</b>ni, Zoom mikrofonida{' '}
+          <b>CABLE Output</b>ni tanlang.
+        </p>
+      )}
+
       {micStream && (
         <div className="meter-track">
           <div className="meter-fill" style={{ width: `${Math.round(level * 100)}%` }} />

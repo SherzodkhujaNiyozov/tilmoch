@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 import { ttsPlaying } from '../lib/ttsGate'
+import { registerSpokenText } from '../lib/echoFilter'
 
 const MAX_QUEUE = 3 // tarjimalar nutqdan tez kelsa, eskilarini tashlab yuboramiz
 
@@ -34,12 +35,17 @@ export function useTtsQueue(): TtsQueue {
     const item = queue.current.shift()
     if (!item) {
       setSpeaking(false)
-      ttsPlaying.current = false
+      // Gate'ni darhol emas, biroz kechiktirib bo'shatamiz: loopback yo'lida
+      // hali "dumi" qolgan TTS audio STT'ga oqib ketmasin.
+      setTimeout(() => {
+        if (!playing.current && queue.current.length === 0) ttsPlaying.current = false
+      }, 700)
       return
     }
     playing.current = true
     setSpeaking(true)
     ttsPlaying.current = true
+    registerSpokenText(item.text) // aks-sado filtri uchun eslab qolamiz
     try {
       const settings = await window.api.getSettings()
       const voice = item.opts?.voice || settings.tts.model

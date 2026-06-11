@@ -14,6 +14,7 @@ export interface MeetingSettings {
 export interface AppSettings {
   sourceLang: string // 'auto' yoki BCP-47 prefiksi: 'en', 'ja', ...
   targetLang: string
+  overlayOpen: boolean // oxirgi sessiyada overlay yoniq edimi — qayta ochishda tiklanadi
   stt: StageConfig
   translate: StageConfig
   tts: StageConfig
@@ -23,6 +24,7 @@ export interface AppSettings {
 export const DEFAULT_SETTINGS: AppSettings = {
   sourceLang: 'auto',
   targetLang: 'uz',
+  overlayOpen: false,
   stt: {
     provider: 'whisper-local',
     model: 'large-v3-turbo',

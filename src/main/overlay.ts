@@ -1,8 +1,14 @@
 import { BrowserWindow, ipcMain, screen } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
+import { updateSettings } from './settings'
 
 let overlayWin: BrowserWindow | null = null
+
+export function openOverlay(): void {
+  if (overlayWin) return
+  createOverlay()
+}
 
 function createOverlay(): void {
   const { width: screenW, height: screenH } = screen.getPrimaryDisplay().workAreaSize
@@ -42,13 +48,15 @@ function createOverlay(): void {
 }
 
 export function registerOverlayIpc(): void {
-  // Asosiy oynadan: overlay'ni ochish/yopish. Holatni qaytaradi.
+  // Asosiy oynadan: overlay'ni ochish/yopish. Holatni qaytaradi va eslab qoladi.
   ipcMain.handle('overlay:toggle', (): boolean => {
     if (overlayWin) {
       overlayWin.close()
+      updateSettings({ overlayOpen: false })
       return false
     }
     createOverlay()
+    updateSettings({ overlayOpen: true })
     return true
   })
 
@@ -59,9 +67,10 @@ export function registerOverlayIpc(): void {
     overlayWin?.webContents.send('overlay:line', line)
   })
 
-  // Overlay o'zini yopish tugmasi
+  // Overlay o'zini yopish tugmasi (✕) — bu ham "o'chirilgan" deb eslab qolinadi
   ipcMain.on('overlay:close', () => {
     overlayWin?.close()
+    updateSettings({ overlayOpen: false })
   })
 }
 

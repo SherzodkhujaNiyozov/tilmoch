@@ -25,9 +25,17 @@ export function loadSettings(): AppSettings {
   return DEFAULT_SETTINGS
 }
 
+export function saveSettings(settings: AppSettings): void {
+  writeFileSync(settingsFile(), JSON.stringify(settings, null, 2), 'utf-8')
+}
+
+export function updateSettings(patch: Partial<AppSettings>): AppSettings {
+  const next = { ...loadSettings(), ...patch }
+  saveSettings(next)
+  return next
+}
+
 export function registerSettingsIpc(): void {
   ipcMain.handle('settings:get', () => loadSettings())
-  ipcMain.handle('settings:save', (_e, settings: AppSettings) => {
-    writeFileSync(settingsFile(), JSON.stringify(settings, null, 2), 'utf-8')
-  })
+  ipcMain.handle('settings:save', (_e, settings: AppSettings) => saveSettings(settings))
 }

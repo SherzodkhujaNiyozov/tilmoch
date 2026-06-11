@@ -2,11 +2,11 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { initMain as initAudioLoopback } from 'electron-audio-loopback'
-import { registerSettingsIpc } from './settings'
+import { loadSettings, registerSettingsIpc } from './settings'
 import { registerOllamaIpc } from './ollama'
 import { registerTtsIpc } from './tts'
 import { registerTranslateIpc } from './translate'
-import { registerOverlayIpc } from './overlay'
+import { registerOverlayIpc, openOverlay, closeOverlay } from './overlay'
 import icon from '../../resources/icon.png?asset'
 
 // Must be called before app is ready — registers the loopback
@@ -31,6 +31,11 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
+  })
+
+  // Asosiy oyna yopilsa, overlay yetim qolib app osilib turmasin
+  mainWindow.on('closed', () => {
+    closeOverlay()
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -71,6 +76,9 @@ app.whenReady().then(() => {
   registerOverlayIpc()
 
   createWindow()
+
+  // Oxirgi sessiyada overlay yoniq bo'lsa, birga ochamiz
+  if (loadSettings().overlayOpen) openOverlay()
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

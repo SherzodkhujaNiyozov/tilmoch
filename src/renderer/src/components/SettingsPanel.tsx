@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import i18n, { UI_LANGUAGES } from '../i18n'
 import type { AppSettings, StageConfig } from '../../../shared/settings'
 import {
   LANGUAGES,
@@ -31,6 +33,7 @@ function StageSection({
   onChange,
   onRefresh
 }: StageSectionProps): React.JSX.Element {
+  const { t } = useTranslation()
   const provider = providers.find((p) => p.id === config.provider) ?? providers[0]
   const models = provider.dynamicModels ? dynamicModels : (provider.models ?? [])
 
@@ -40,7 +43,7 @@ function StageSection({
     <div className="stage">
       <h3>{title}</h3>
       <div className="stage-row">
-        <label>Provider</label>
+        <label>{t('settings.provider')}</label>
         <select
           value={config.provider}
           onChange={(e) => {
@@ -61,12 +64,12 @@ function StageSection({
       </div>
 
       <div className="stage-row">
-        <label>Model</label>
+        <label>{t('settings.model')}</label>
         <div className="model-select">
           {models.length > 0 ? (
             <select value={config.model} onChange={(e) => set({ model: e.target.value })}>
               {!models.includes(config.model) && config.model && (
-                <option value={config.model}>{config.model} (oʻrnatilmagan!)</option>
+                <option value={config.model}>{config.model} {t('settings.notInstalled')}</option>
               )}
               {models.map((m) => (
                 <option key={m} value={m}>
@@ -76,11 +79,13 @@ function StageSection({
             </select>
           ) : (
             <select disabled>
-              <option>{provider.dynamicModels ? 'Modellar topilmadi' : 'Model yoʻq'}</option>
+              <option>
+                {provider.dynamicModels ? t('settings.modelsNotFound') : t('settings.noModel')}
+              </option>
             </select>
           )}
           {provider.dynamicModels && onRefresh && (
-            <button className="btn-refresh" title="Roʻyxatni yangilash" onClick={onRefresh}>
+            <button className="btn-refresh" title={t('settings.refresh')} onClick={onRefresh}>
               ↻
             </button>
           )}
@@ -91,7 +96,7 @@ function StageSection({
 
       {provider.needsEndpoint && (
         <div className="stage-row">
-          <label>Endpoint</label>
+          <label>{t('settings.endpoint')}</label>
           <input
             type="text"
             value={config.endpoint}
@@ -103,7 +108,7 @@ function StageSection({
 
       {provider.needsApiKey && (
         <div className="stage-row">
-          <label>API key</label>
+          <label>{t('settings.apiKey')}</label>
           <input
             type="password"
             value={config.apiKey}
@@ -117,6 +122,7 @@ function StageSection({
 }
 
 export function SettingsPanel(): React.JSX.Element {
+  const { t } = useTranslation()
   const [settings, setSettings] = useState<AppSettings | null>(null)
   const [ollamaModels, setOllamaModels] = useState<string[]>([])
   const [ollamaError, setOllamaError] = useState<string | null>(null)
@@ -141,9 +147,9 @@ export function SettingsPanel(): React.JSX.Element {
       setOllamaError(
         r.ok
           ? r.models.length === 0
-            ? 'Ollama ishlayapti, lekin model oʻrnatilmagan. Masalan: ollama pull gemma3'
+            ? i18n.t('settings.ollamaNoModels')
             : null
-          : `Ollama topilmadi (${ollamaEndpoint}). Ollama oʻrnatilganmi va ishlayaptimi?`
+          : i18n.t('settings.ollamaNotFound', { endpoint: ollamaEndpoint })
       )
       if (r.ok && r.models.length > 0) {
         setSettings((s) => {
@@ -177,7 +183,7 @@ export function SettingsPanel(): React.JSX.Element {
           })
         }
       })
-      .catch(() => setVoicesError('Edge TTS ovozlarini olib boʻlmadi (internet kerak).'))
+      .catch(() => setVoicesError(i18n.t('settings.voicesFailed')))
   }, [ttsProvider, targetLang])
   useEffect(refreshVoices, [refreshVoices])
 
@@ -186,7 +192,7 @@ export function SettingsPanel(): React.JSX.Element {
     setSaved(false)
   }, [])
 
-  if (!settings) return <p className="status">Sozlamalar yuklanmoqda…</p>
+  if (!settings) return <p className="status">{t('settings.loading')}</p>
 
   const save = async (): Promise<void> => {
     await window.api.saveSettings(settings)
@@ -213,12 +219,31 @@ export function SettingsPanel(): React.JSX.Element {
 
   return (
     <div className="settings">
-      <h2>Sozlamalar</h2>
+      <h2>{t('settings.title')}</h2>
 
       <div className="stage">
-        <h3>Tillar</h3>
+        <h3>{t('settings.languages')}</h3>
         <div className="stage-row">
-          <label>Manba til</label>
+          <label>{t('settings.uiLang')}</label>
+          <select
+            value={settings.uiLang}
+            onChange={(e) => {
+              const lang = e.target.value
+              const next = { ...settings, uiLang: lang }
+              setSettings(next)
+              void i18n.changeLanguage(lang)
+              void window.api.saveSettings(next)
+            }}
+          >
+            {UI_LANGUAGES.map((l) => (
+              <option key={l.code} value={l.code}>
+                {l.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="stage-row">
+          <label>{t('settings.sourceLang')}</label>
           <select
             value={settings.sourceLang}
             onChange={(e) => {
@@ -228,13 +253,13 @@ export function SettingsPanel(): React.JSX.Element {
           >
             {LANGUAGES.map((l) => (
               <option key={l.code} value={l.code}>
-                {l.label}
+                {l.code === 'auto' ? t('langs.auto') : l.label}
               </option>
             ))}
           </select>
         </div>
         <div className="stage-row">
-          <label>Maqsad til</label>
+          <label>{t('settings.targetLang')}</label>
           <select
             value={settings.targetLang}
             onChange={(e) => {
@@ -252,7 +277,7 @@ export function SettingsPanel(): React.JSX.Element {
       </div>
 
       <StageSection
-        title="1. Ovoz → Matn (STT)"
+        title={t('settings.stt')}
         stage="stt"
         config={settings.stt}
         providers={STT_PROVIDERS}
@@ -262,7 +287,7 @@ export function SettingsPanel(): React.JSX.Element {
       />
 
       <StageSection
-        title="2. Tarjima"
+        title={t('settings.translate')}
         stage="translate"
         config={settings.translate}
         providers={TRANSLATE_PROVIDERS}
@@ -273,7 +298,7 @@ export function SettingsPanel(): React.JSX.Element {
       />
 
       <StageSection
-        title="3. Matn → Ovoz (TTS)"
+        title={t('settings.tts')}
         stage="tts"
         config={settings.tts}
         providers={TTS_PROVIDERS}
@@ -285,16 +310,16 @@ export function SettingsPanel(): React.JSX.Element {
 
       <div className="settings-actions">
         <button className="btn btn-start" onClick={save}>
-          Saqlash
+          {t('settings.save')}
         </button>
         <button
           className="btn btn-secondary"
           onClick={testTts}
           disabled={testing || settings.tts.provider !== 'edge-tts' || !settings.tts.model}
         >
-          {testing ? 'Oʻqilmoqda…' : 'TTS sinash 🔊'}
+          {testing ? t('settings.testing') : t('settings.testTts')}
         </button>
-        {saved && <span className="saved-badge">✓ Saqlandi</span>}
+        {saved && <span className="saved-badge">{t('settings.saved')}</span>}
       </div>
     </div>
   )

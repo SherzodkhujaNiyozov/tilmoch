@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSystemAudio } from './hooks/useSystemAudio'
 import { SettingsPanel } from './components/SettingsPanel'
 import { MeetingPanel } from './components/MeetingPanel'
@@ -6,13 +7,10 @@ import { VideoTab } from './components/VideoTab'
 
 type Tab = 'video' | 'meeting' | 'settings'
 
-const TABS: { id: Tab; label: string }[] = [
-  { id: 'video', label: '📺 Video tarjima' },
-  { id: 'meeting', label: '🎙️ Meeting' },
-  { id: 'settings', label: '⚙️ Sozlamalar' }
-]
+const TAB_IDS: Tab[] = ['video', 'meeting', 'settings']
 
 function App(): React.JSX.Element {
+  const { t } = useTranslation()
   const [tab, setTab] = useState<Tab>('video')
   // Capture holati App darajasida — tab almashganda to'xtab qolmasin
   const audio = useSystemAudio()
@@ -22,17 +20,17 @@ function App(): React.JSX.Element {
       <header className="topbar">
         <div className="brand">
           <span className="brand-name">Tilmoch</span>
-          <span className="brand-sub">real-time tarjimon</span>
+          <span className="brand-sub">{t('brand.sub')}</span>
         </div>
         <nav className="tabs">
-          {TABS.map((t) => (
+          {TAB_IDS.map((id) => (
             <button
-              key={t.id}
-              className={`tab ${tab === t.id ? 'active' : ''}`}
-              onClick={() => setTab(t.id)}
+              key={id}
+              className={`tab ${tab === id ? 'active' : ''}`}
+              onClick={() => setTab(id)}
             >
-              {t.label}
-              {t.id === 'video' && audio.capturing && <span className="live-dot" />}
+              {t(`tabs.${id}`)}
+              {id === 'video' && audio.capturing && <span className="live-dot" />}
             </button>
           ))}
         </nav>

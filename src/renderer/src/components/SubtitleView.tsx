@@ -1,20 +1,22 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useStt } from '../hooks/useStt'
 import { useTtsQueue } from '../hooks/useTtsQueue'
 
-const STATUS_LABELS: Record<string, string> = {
-  idle: 'Kutilmoqda',
-  connecting: 'STT serverga ulanmoqda…',
-  ready: 'Tinglayapman 🎧',
-  error: 'Xato'
-}
-
 export function SubtitleView({ stream }: { stream: MediaStream | null }): React.JSX.Element {
-  const { status, error, lines } = useStt(stream)
+  const { t } = useTranslation()
+  const { status, error, lines, clearLines } = useStt(stream)
   const { speaking, enqueue, clear } = useTtsQueue()
   const [voiceOn, setVoiceOn] = useState(true)
   const scrollRef = useRef<HTMLDivElement>(null)
   const lastSpokenId = useRef(-1)
+
+  const statusLabels: Record<string, string> = {
+    idle: t('subtitle.statusIdle'),
+    connecting: t('subtitle.statusConnecting'),
+    ready: t('subtitle.statusReady'),
+    error: t('subtitle.statusError')
+  }
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight })
@@ -39,16 +41,21 @@ export function SubtitleView({ stream }: { stream: MediaStream | null }): React.
   return (
     <div className="subtitles">
       <div className="subtitles-header">
-        <h2>Subtitle</h2>
+        <h2>{t('subtitle.title')}</h2>
         <div className="subtitles-controls">
-          <button
-            className={`btn-voice ${voiceOn ? 'on' : ''}`}
-            onClick={toggleVoice}
-            title={voiceOn ? 'Ovozli tarjimani oʻchirish' : 'Ovozli tarjimani yoqish'}
-          >
-            {voiceOn ? (speaking ? '🔊 Gapiryapman…' : '🔊 Ovoz yoniq') : '🔇 Ovoz oʻchiq'}
+          {lines.length > 0 && (
+            <button className="btn-voice" onClick={clearLines} title={t('subtitle.clear')}>
+              {t('subtitle.clear')}
+            </button>
+          )}
+          <button className={`btn-voice ${voiceOn ? 'on' : ''}`} onClick={toggleVoice}>
+            {voiceOn
+              ? speaking
+                ? t('subtitle.speaking')
+                : t('subtitle.voiceOn')
+              : t('subtitle.voiceOff')}
           </button>
-          <span className={`stt-status stt-${status}`}>{STATUS_LABELS[status]}</span>
+          <span className={`stt-status stt-${status}`}>{statusLabels[status]}</span>
         </div>
       </div>
 
@@ -57,9 +64,7 @@ export function SubtitleView({ stream }: { stream: MediaStream | null }): React.
       <div className="subtitle-box" ref={scrollRef}>
         {lines.length === 0 ? (
           <p className="subtitle-empty">
-            {status === 'ready'
-              ? 'Video yoki audio qoʻying — gap tugagach matn shu yerda chiqadi.'
-              : 'Capture boshlanganda subtitle shu yerda koʻrinadi.'}
+            {status === 'ready' ? t('subtitle.emptyReady') : t('subtitle.emptyIdle')}
           </p>
         ) : (
           lines.map((line, i) => (
@@ -68,21 +73,18 @@ export function SubtitleView({ stream }: { stream: MediaStream | null }): React.
               {line.dst !== null ? (
                 <p className="subtitle-dst">{line.dst}</p>
               ) : line.dstError ? (
-                <p className="subtitle-dst-error">tarjima xatosi: {line.dstError}</p>
+                <p className="subtitle-dst-error">
+                  {t('subtitle.translateError')}: {line.dstError}
+                </p>
               ) : (
-                <p className="subtitle-dst pending">tarjima qilinmoqda…</p>
+                <p className="subtitle-dst pending">{t('subtitle.pending')}</p>
               )}
             </div>
           ))
         )}
       </div>
 
-      {voiceOn && (
-        <p className="hint">
-          ⚠️ Ovozli tarjima paytida asl audio tinglanmaydi (aks-sado halqasining oldini olish
-          uchun). Video tarjimada subtitle rejimi qulayroq.
-        </p>
-      )}
+      {voiceOn && <p className="hint">{t('subtitle.voiceHint')}</p>}
     </div>
   )
 }

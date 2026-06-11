@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AppSettings } from '../../../shared/settings'
 import { LANGUAGES } from '../providers'
 import { useStt } from '../hooks/useStt'
@@ -15,6 +16,7 @@ interface AudioDevice {
  * Zoom/Meet'da mikrofon sifatida virtual cable'ning narigi uchi tanlanadi.
  */
 export function MeetingPanel(): React.JSX.Element {
+  const { t } = useTranslation()
   const [settings, setSettings] = useState<AppSettings | null>(null)
   const [micStream, setMicStream] = useState<MediaStream | null>(null)
   const [outputs, setOutputs] = useState<AudioDevice[]>([])
@@ -24,7 +26,7 @@ export function MeetingPanel(): React.JSX.Element {
   const [micError, setMicError] = useState<string | null>(null)
   const lastSpokenId = useRef(-1)
 
-  const { status, error, lines, level } = useStt(
+  const { status, error, lines, level, clearLines } = useStt(
     micStream,
     settings
       ? { language: settings.meeting.myLang, targetLang: settings.meeting.partnerLang }
@@ -108,28 +110,24 @@ export function MeetingPanel(): React.JSX.Element {
     lastSpokenId.current = -1
   }
 
-  if (!settings) return <p className="status">Yuklanmoqda…</p>
+  if (!settings) return <p className="status">{t('meeting.loading')}</p>
 
   return (
     <div className="settings">
       <div className="subtitles-header">
-        <h2>Meeting rejimi — sizning gapingiz suhbatdosh tilida</h2>
+        <h2>{t('meeting.title')}</h2>
         {micStream && (
           <span className={`stt-status stt-${status}`}>
-            {speaking ? '🔊 Tarjima yuborilmoqda…' : status === 'ready' ? '🎙️ Gapiravering' : '…'}
+            {speaking ? t('meeting.sending') : status === 'ready' ? t('meeting.speak') : '…'}
           </span>
         )}
       </div>
 
-      <p className="hint">
-        Siz oʻz tilingizda gapirasiz — suhbatdosh oʻz tilida eshitadi. TTS ovozini virtual
-        cable'ga yoʻnaltiring (masalan, VB-Cable: «CABLE Input»), Zoom/Meet'da esa mikrofon
-        sifatida «CABLE Output»ni tanlang.
-      </p>
+      <p className="hint">{t('meeting.hint')}</p>
 
       <div className="stage">
         <div className="stage-row">
-          <label>Mening tilim</label>
+          <label>{t('meeting.myLang')}</label>
           <select
             value={settings.meeting.myLang}
             onChange={(e) => updateMeeting({ myLang: e.target.value })}
@@ -144,7 +142,7 @@ export function MeetingPanel(): React.JSX.Element {
         </div>
 
         <div className="stage-row">
-          <label>Suhbatdosh tili</label>
+          <label>{t('meeting.partnerLang')}</label>
           <select
             value={settings.meeting.partnerLang}
             onChange={(e) => updateMeeting({ partnerLang: e.target.value })}
@@ -159,10 +157,10 @@ export function MeetingPanel(): React.JSX.Element {
         </div>
 
         <div className="stage-row">
-          <label>Mikrofon</label>
+          <label>{t('meeting.mic')}</label>
           <div className="model-select">
             <select value={micId} onChange={(e) => setMicId(e.target.value)} disabled={!!micStream}>
-              <option value="">Default mikrofon</option>
+              <option value="">{t('meeting.micDefault')}</option>
               {mics.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.label}
@@ -176,13 +174,13 @@ export function MeetingPanel(): React.JSX.Element {
         </div>
 
         <div className="stage-row">
-          <label>TTS chiqishi</label>
+          <label>{t('meeting.ttsOut')}</label>
           <div className="model-select">
             <select
               value={settings.meeting.outputDeviceId}
               onChange={(e) => updateMeeting({ outputDeviceId: e.target.value })}
             >
-              <option value="">Default (kolonka/quloqchin)</option>
+              <option value="">{t('meeting.outDefault')}</option>
               {outputs.map((o) => (
                 <option key={o.id} value={o.id}>
                   {o.label}
@@ -197,7 +195,7 @@ export function MeetingPanel(): React.JSX.Element {
 
         {voice && (
           <p className="status">
-            Suhbatdosh eshitadigan ovoz: <b>{voice}</b>
+            {t('meeting.voiceLabel')}: <b>{voice}</b>
           </p>
         )}
       </div>
@@ -205,12 +203,7 @@ export function MeetingPanel(): React.JSX.Element {
       {(micError || error) && <p className="error">{micError ?? error}</p>}
 
       {!settings.meeting.outputDeviceId && (
-        <p className="stage-error">
-          ⚠️ TTS hozir oddiy kolonkaga chiqadi — bu aks-sado (loop) xavfini tugʻdiradi va
-          suhbatdosh tarjimani faqat mikrofoningiz orqali eshitadi. Toza ishlashi uchun{' '}
-          <b>VB-Cable</b> oʻrnatib, «TTS chiqishi»da <b>CABLE Input</b>ni, Zoom mikrofonida{' '}
-          <b>CABLE Output</b>ni tanlang.
-        </p>
+        <p className="stage-error">{t('meeting.warnDefaultOut')}</p>
       )}
 
       {micStream && (
@@ -221,18 +214,26 @@ export function MeetingPanel(): React.JSX.Element {
 
       {micStream ? (
         <button className="btn btn-stop" onClick={stop}>
-          Meeting rejimini toʻxtatish
+          {t('meeting.stop')}
         </button>
       ) : (
         <button className="btn btn-start" onClick={start}>
-          🎙️ Meeting rejimini boshlash
+          {t('meeting.start')}
         </button>
+      )}
+
+      {micStream && lines.length > 0 && (
+        <div className="subtitles-controls" style={{ justifyContent: 'flex-end' }}>
+          <button className="btn-voice" onClick={clearLines}>
+            {t('meeting.clear')}
+          </button>
+        </div>
       )}
 
       {micStream && (
         <div className="subtitle-box">
           {lines.length === 0 ? (
-            <p className="subtitle-empty">Gapiring — gapingiz va tarjimasi shu yerda chiqadi.</p>
+            <p className="subtitle-empty">{t('meeting.empty')}</p>
           ) : (
             lines.map((line, i) => (
               <div

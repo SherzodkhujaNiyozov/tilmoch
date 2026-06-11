@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ttsPlaying } from '../lib/ttsGate'
 import { isLikelyEcho } from '../lib/echoFilter'
+import i18n from '../i18n'
 
 const STT_URL = 'ws://127.0.0.1:8765'
 
@@ -16,6 +17,7 @@ export interface SttState {
   error: string | null
   lines: SubtitleLine[] // oxirgisi eng yangi
   level: number // 0..1 — kirayotgan audio darajasi (diagnostika uchun)
+  clearLines: () => void // terminalni tozalash
 }
 
 /**
@@ -106,7 +108,7 @@ export function useStt(stream: MediaStream | null, options?: SttOptions): SttSta
 
       ws.onerror = () => {
         if (!cancelled) {
-          setError('STT serverga ulanib boʻlmadi. python/stt_server.py ishlayaptimi?')
+          setError(i18n.t('stt.connectError'))
           setStatus('error')
         }
       }
@@ -170,5 +172,10 @@ export function useStt(stream: MediaStream | null, options?: SttOptions): SttSta
     }
   }, [stream])
 
-  return { status, error, lines, level }
+  const clearLines = useCallback(() => {
+    setLines([])
+    setError(null)
+  }, [])
+
+  return { status, error, lines, level, clearLines }
 }

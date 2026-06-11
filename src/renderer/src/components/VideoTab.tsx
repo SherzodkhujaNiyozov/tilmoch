@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { SystemAudioState } from '../hooks/useSystemAudio'
 import { SubtitleView } from './SubtitleView'
 
@@ -6,6 +7,7 @@ import { SubtitleView } from './SubtitleView'
  * Video/kiruvchi tarjima sahifasi: system audio capture boshqaruvi + jonli subtitle.
  */
 export function VideoTab({ audio }: { audio: SystemAudioState }): React.JSX.Element {
+  const { t } = useTranslation()
   const { capturing, level, error, stream, start, stop } = audio
   const [overlayOpen, setOverlayOpen] = useState(false)
 
@@ -22,27 +24,20 @@ export function VideoTab({ audio }: { audio: SystemAudioState }): React.JSX.Elem
       <div className="card">
         <div className="card-head">
           <div>
-            <h2>Kiruvchi tarjima</h2>
-            <p className="muted">
-              Noutbukdan chiqayotgan har qanday ovoz — YouTube, video, Zoom'dagi suhbatdosh —
-              tahlil qilinib, pastda tarjima qilinadi.
-            </p>
+            <h2>{t('video.title')}</h2>
+            <p className="muted">{t('video.desc')}</p>
           </div>
           <div className="card-actions">
-            <button
-              className={`btn-voice ${overlayOpen ? 'on' : ''}`}
-              onClick={toggleOverlay}
-              title="Video ustida ko'rinadigan subtitle oynasi"
-            >
-              {overlayOpen ? '🗗 Overlay yoniq' : '🗗 Overlay'}
+            <button className={`btn-voice ${overlayOpen ? 'on' : ''}`} onClick={toggleOverlay}>
+              {overlayOpen ? t('video.overlayOn') : t('video.overlay')}
             </button>
             {capturing ? (
               <button className="btn btn-stop" onClick={stop}>
-                ■ Toʻxtatish
+                {t('video.stop')}
               </button>
             ) : (
               <button className="btn btn-start" onClick={start}>
-                ▶ Boshlash
+                {t('video.start')}
               </button>
             )}
           </div>

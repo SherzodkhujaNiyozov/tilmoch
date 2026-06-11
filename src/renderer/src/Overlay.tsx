@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface OverlayLine {
   id: number
@@ -11,6 +12,7 @@ interface OverlayLine {
  * Asosiy oynadan IPC orqali kelgan oxirgi tarjimani ko'rsatadi.
  */
 export function Overlay(): React.JSX.Element {
+  const { t } = useTranslation()
   const [line, setLine] = useState<OverlayLine | null>(null)
 
   useEffect(() => {
@@ -36,7 +38,7 @@ export function Overlay(): React.JSX.Element {
         </div>
       ) : (
         <div className="overlay-content">
-          <p className="overlay-waiting">Tilmoch — tarjima shu yerda chiqadi</p>
+          <p className="overlay-waiting">{t('overlay.waiting')}</p>
         </div>
       )}
     </div>

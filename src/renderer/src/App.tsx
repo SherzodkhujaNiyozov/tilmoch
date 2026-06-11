@@ -1,8 +1,9 @@
 import { useSystemAudio } from './hooks/useSystemAudio'
 import { SettingsPanel } from './components/SettingsPanel'
+import { SubtitleView } from './components/SubtitleView'
 
 function App(): React.JSX.Element {
-  const { capturing, level, error, start, stop } = useSystemAudio()
+  const { capturing, level, error, stream, start, stop } = useSystemAudio()
 
   return (
     <div className="app">
@@ -36,6 +37,10 @@ function App(): React.JSX.Element {
         <p className="status">
           {capturing ? 'Capturing… musiqa yoki video qoʻying — meter harakatlanishi kerak.' : 'Idle'}
         </p>
+      </main>
+
+      <main className="panel">
+        <SubtitleView stream={stream} />
       </main>
 
       <main className="panel">

@@ -4,6 +4,7 @@ export interface SystemAudioState {
   capturing: boolean
   level: number // 0..1 RMS level for the meter
   error: string | null
+  stream: MediaStream | null
   start: () => Promise<void>
   stop: () => void
 }
@@ -17,6 +18,7 @@ export function useSystemAudio(): SystemAudioState {
   const [capturing, setCapturing] = useState(false)
   const [level, setLevel] = useState(0)
   const [error, setError] = useState<string | null>(null)
+  const [stream, setStream] = useState<MediaStream | null>(null)
 
   const streamRef = useRef<MediaStream | null>(null)
   const audioCtxRef = useRef<AudioContext | null>(null)
@@ -28,6 +30,7 @@ export function useSystemAudio(): SystemAudioState {
     streamRef.current = null
     audioCtxRef.current?.close()
     audioCtxRef.current = null
+    setStream(null)
     setCapturing(false)
     setLevel(0)
   }, [])
@@ -68,6 +71,7 @@ export function useSystemAudio(): SystemAudioState {
         rafRef.current = requestAnimationFrame(tick)
       }
       tick()
+      setStream(stream)
       setCapturing(true)
     } catch (e) {
       await window.api.disableLoopbackAudio().catch(() => {})
@@ -78,5 +82,5 @@ export function useSystemAudio(): SystemAudioState {
 
   useEffect(() => stop, [stop])
 
-  return { capturing, level, error, start, stop }
+  return { capturing, level, error, stream, start, stop }
 }

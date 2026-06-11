@@ -223,3 +223,65 @@ body {
 .btn-refresh:hover {
   background: var(--ev-c-gray-3);
 }
+
+/* Subtitles */
+.subtitles {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.subtitles-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.subtitles-header h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.stt-status {
+  font-size: 0.78rem;
+  padding: 3px 10px;
+  border-radius: 10px;
+  background: var(--ev-c-black-mute);
+  color: var(--ev-c-text-2);
+}
+
+.stt-ready {
+  color: #66bb6a;
+}
+
+.stt-error {
+  color: #ef5350;
+}
+
+.subtitle-box {
+  height: 180px;
+  overflow-y: auto;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--ev-c-black-mute);
+  border: 1px solid var(--ev-c-gray-3);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.subtitle-empty {
+  color: var(--ev-c-text-3);
+  font-size: 0.85rem;
+}
+
+.subtitle-line {
+  font-size: 0.92rem;
+  color: var(--ev-c-text-2);
+  line-height: 1.45;
+}
+
+.subtitle-line.latest {
+  color: var(--ev-c-text-1);
+  font-weight: 500;
+}

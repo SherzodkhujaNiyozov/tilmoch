@@ -64,6 +64,53 @@ async function translateWithOllama(text: string): Promise<TranslateResult> {
   return { ok: true, text: stripThinking(data.message?.content ?? '') }
 }
 
+/**
+ * Google Translate'ning norasmiy bepul endpoint'i (kalit kerak emas).
+ * Ogohlantirish: norasmiy — Google cheklashi yoki o'zgartirishi mumkin,
+ * shuning uchun bu provider'lardan biri xolos, yagona yo'l emas.
+ */
+async function translateWithGoogleFree(text: string): Promise<TranslateResult> {
+  const s = loadSettings()
+  const sl = s.sourceLang === 'auto' ? 'auto' : s.sourceLang
+  const url =
+    `https://translate.googleapis.com/translate_a/single?client=gtx` +
+    `&sl=${sl}&tl=${s.targetLang}&dt=t&q=${encodeURIComponent(text)}`
+  const res = await fetch(url, {
+    headers: { 'User-Agent': 'Mozilla/5.0' },
+    signal: AbortSignal.timeout(10000)
+  })
+  if (!res.ok) throw new Error(`Google Translate HTTP ${res.status}`)
+  const data = (await res.json()) as [[string][]]
+  const out = (data[0] ?? []).map((seg) => seg[0]).join('')
+  return { ok: true, text: out.trim() }
+}
+
+async function translateWithDeepL(text: string): Promise<TranslateResult> {
+  const s = loadSettings()
+  const key = s.translate.apiKey
+  // Bepul tier kalitlari ':fx' bilan tugaydi va alohida hostda ishlaydi.
+  const base = key.endsWith(':fx') ? 'https://api-free.deepl.com' : 'https://api.deepl.com'
+  const res = await fetch(`${base}/v2/translate`, {
+    method: 'POST',
+    headers: {
+      Authorization: `DeepL-Auth-Key ${key}`,
+      'Content-Type': 'application/json'
+    },
+    signal: AbortSignal.timeout(15000),
+    body: JSON.stringify({
+      text: [text],
+      target_lang: s.targetLang.toUpperCase(),
+      ...(s.sourceLang !== 'auto' && { source_lang: s.sourceLang.toUpperCase() })
+    })
+  })
+  if (!res.ok) {
+    const body = await res.text().catch(() => '')
+    throw new Error(`DeepL HTTP ${res.status}${body ? `: ${body.slice(0, 120)}` : ''}`)
+  }
+  const data = (await res.json()) as { translations?: { text: string }[] }
+  return { ok: true, text: (data.translations?.[0]?.text ?? '').trim() }
+}
+
 async function translateWithOpenAI(text: string): Promise<TranslateResult> {
   const s = loadSettings()
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -91,7 +138,9 @@ export function registerTranslateIpc(): void {
   ipcMain.handle('translate:text', async (_e, text: string): Promise<TranslateResult> => {
     try {
       const provider = loadSettings().translate.provider
+      if (provider === 'google-free') return await translateWithGoogleFree(text)
       if (provider === 'ollama') return await translateWithOllama(text)
+      if (provider === 'deepl') return await translateWithDeepL(text)
       if (provider === 'openai') return await translateWithOpenAI(text)
       return { ok: false, text: '', error: `Provider '${provider}' hali qo'llanmaydi` }
     } catch (e) {

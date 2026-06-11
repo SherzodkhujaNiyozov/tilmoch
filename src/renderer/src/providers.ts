@@ -37,6 +37,13 @@ export const STT_PROVIDERS: ProviderDef[] = [
 
 export const TRANSLATE_PROVIDERS: ProviderDef[] = [
   {
+    id: 'google-free',
+    label: 'Google Translate (bepul, kalitsiz)',
+    free: true,
+    needsApiKey: false,
+    models: ['nmt']
+  },
+  {
     id: 'ollama',
     label: 'Ollama (lokal, bepul)',
     free: true,
@@ -45,18 +52,18 @@ export const TRANSLATE_PROVIDERS: ProviderDef[] = [
     dynamicModels: 'ollama'
   },
   {
+    id: 'deepl',
+    label: 'DeepL API (bepul tier: 500k belgi/oy)',
+    free: false,
+    needsApiKey: true,
+    models: ['default']
+  },
+  {
     id: 'openai',
     label: 'OpenAI API',
     free: false,
     needsApiKey: true,
     models: ['gpt-4o-mini', 'gpt-4o']
-  },
-  {
-    id: 'google',
-    label: 'Google Translate API',
-    free: false,
-    needsApiKey: true,
-    models: ['nmt']
   }
 ]
 

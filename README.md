@@ -106,14 +106,18 @@ Click **Start system audio capture**, play any video, and watch the subtitles ap
 | `small` | ~0.5 GB | OK | CPU-only machines |
 | `base` / `tiny` | <0.3 GB | Rough | Very weak hardware only |
 
-### Translation (Ollama, runs locally)
+### Translation
 
-| Model | Size | When to use |
+| Provider | Cost | When to use |
 |---|---|---|
-| **`gemma3:4b`** ⭐ | ~3 GB | Default — strong multilingual (140+ languages), fits 4 GB VRAM |
-| `qwen2.5:3b` / `qwen3:4b` | ~2 GB | Strong for Japanese/Chinese/Korean content |
-| `gemma3:12b` | ~8 GB | Better quality if you have 12 GB+ VRAM |
+| **Google Translate (free endpoint)** ⭐ | Free, no key | Best quality for low-resource languages (e.g. Uzbek). Unofficial endpoint — may be rate-limited. |
+| Ollama `gemma3:4b` | Free, local | Fully offline, strong for major languages (140+), fits 4 GB VRAM |
+| Ollama `qwen2.5:3b` / `qwen3:4b` | Free, local | Strong for Japanese/Chinese/Korean content |
+| DeepL API | Free tier (500k chars/month) | Highest quality for European languages |
+| OpenAI API | Paid | Context-aware translation |
 
+> **Low-resource languages (Uzbek, etc.):** small local LLMs produce poor translations — use the Google Translate provider instead. For major languages (Russian, Japanese, Spanish…), local Ollama models work great and keep everything offline.
+>
 > Avoid "thinking" models (e.g. `deepseek-r1`) for translation — they reason before answering, which kills real-time latency.
 
 ### Text-to-Speech

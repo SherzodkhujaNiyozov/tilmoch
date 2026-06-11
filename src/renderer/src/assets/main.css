@@ -309,3 +309,24 @@ body {
   font-size: 0.8rem;
   color: #ef9a9a;
 }
+
+.subtitles-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-voice {
+  padding: 4px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--ev-c-gray-2);
+  background: var(--ev-c-black-mute);
+  color: var(--ev-c-text-2);
+  cursor: pointer;
+  font-size: 0.78rem;
+}
+
+.btn-voice.on {
+  border-color: #1976d2;
+  color: #4fc3f7;
+}

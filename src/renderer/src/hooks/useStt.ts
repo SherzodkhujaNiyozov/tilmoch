@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { ttsPlaying } from '../lib/ttsGate'
 
 const STT_URL = 'ws://127.0.0.1:8765'
 

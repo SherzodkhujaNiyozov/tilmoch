@@ -17,7 +17,7 @@ export const STT_PROVIDERS: ProviderDef[] = [
     label: 'Whisper (lokal, bepul)',
     free: true,
     needsApiKey: false,
-    models: ['tiny', 'base', 'small', 'medium', 'large-v3']
+    models: ['large-v3-turbo', 'distil-large-v3', 'medium', 'small', 'base', 'tiny']
   },
   {
     id: 'openai',

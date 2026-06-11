@@ -47,10 +47,11 @@ def _setup_cuda_dlls() -> None:
 _setup_cuda_dlls()
 
 SAMPLE_RATE = 16000
-SILENCE_RMS = 0.008          # bundan past RMS = jimlik
+SILENCE_RMS = 0.005          # bundan past RMS = jimlik (past qo'yilgan — sokin nutq kesilmasin)
 SILENCE_FLUSH_MS = 700       # gapdan keyin shuncha jimlik -> segmentni yakunlash
-MAX_SEGMENT_SEC = 8          # jimlik bo'lmasa ham shu uzunlikda majburan yakunlash
+MAX_SEGMENT_SEC = 10         # jimlik bo'lmasa ham shu uzunlikda majburan yakunlash
 MIN_SEGMENT_SEC = 0.4        # bundan qisqa segmentlar tashlab yuboriladi
+BEAM_SIZE = 2                # 1 = eng tez/xom, 5 = eng aniq/sekin
 
 _models: dict[str, WhisperModel] = {}
 
@@ -90,19 +91,23 @@ async def handle(ws):
     buf = np.zeros(0, dtype=np.float32)
     silence_samples = 0
     has_speech = False
+    prev_text = ""  # oldingi segment matni — modelga kontekst sifatida beriladi
 
     def transcribe(audio: np.ndarray) -> str:
         segments, _info = model.transcribe(
             audio,
             language=lang,
-            beam_size=1,
+            beam_size=BEAM_SIZE,
             vad_filter=True,
             condition_on_previous_text=False,
+            # Oldingi gap kontekst beradi: atamalar/ismlar izchil chiqadi,
+            # gap o'rtasidan boshlangan segmentlar yaxshiroq tushuniladi.
+            initial_prompt=prev_text[-200:] if prev_text else None,
         )
         return " ".join(s.text.strip() for s in segments).strip()
 
     async def flush():
-        nonlocal buf, silence_samples, has_speech
+        nonlocal buf, silence_samples, has_speech, prev_text
         audio, buf = buf, np.zeros(0, dtype=np.float32)
         silence_samples = 0
         has_speech = False
@@ -115,6 +120,7 @@ async def handle(ws):
             await ws.send(json.dumps({"type": "error", "message": f"Transkripsiya xatosi: {e}"}))
             return
         if text:
+            prev_text = text
             await ws.send(json.dumps({"type": "final", "text": text}, ensure_ascii=False))
 
     async for message in ws:

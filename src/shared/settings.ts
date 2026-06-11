@@ -18,7 +18,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   targetLang: 'uz',
   stt: {
     provider: 'whisper-local',
-    model: 'small',
+    model: 'large-v3-turbo',
     apiKey: '',
     endpoint: ''
   },

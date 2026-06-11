@@ -4,6 +4,7 @@ import { useSystemAudio } from './hooks/useSystemAudio'
 import { SettingsPanel } from './components/SettingsPanel'
 import { MeetingPanel } from './components/MeetingPanel'
 import { VideoTab } from './components/VideoTab'
+import mark from './assets/tilmoch-mark.svg'
 
 type Tab = 'video' | 'meeting' | 'settings'
 
@@ -19,6 +20,7 @@ function App(): React.JSX.Element {
     <div className="shell">
       <header className="topbar">
         <div className="brand">
+          <img className="brand-mark" src={mark} alt="" />
           <span className="brand-name">Tilmoch</span>
           <span className="brand-sub">{t('brand.sub')}</span>
         </div>

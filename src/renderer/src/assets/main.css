@@ -1,21 +1,47 @@
 @import './base.css';
+/* Inter — dizayn tizimi shrifti. Oflaynda tizim shriftiga tushadi. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+/* Tilmoch Design System tokenlari (claude.ai/design handoff'idan) */
 :root {
   --accent: #4fc3f7;
+  --accent-teal: #4dd0e1;
   --accent-strong: #1976d2;
   --accent-soft: rgba(79, 195, 247, 0.1);
-  --bg: #0f1115;
-  --bg-card: #171a21;
-  --bg-inset: #11141a;
-  --border: #262b36;
-  --border-strong: #333a48;
-  --text-1: #eef1f6;
-  --text-2: #9aa3b2;
-  --text-3: #5f6877;
+  --tilmoch-gradient: linear-gradient(90deg, #4fc3f7 0%, #81d4fa 55%, #4dd0e1 100%);
+
+  /* Near-black surface ramp: shell -> body -> panel -> inset */
+  --bg-shell: #0f1115;
+  --bg: #1b1b1f;
+  --bg-card: #222222;
+  --bg-inset: #282828;
+
+  /* Cool gray hairlines */
+  --border: #32363f;
+  --border-strong: #414853;
+  --gray-1: #515c67;
+
+  /* Warm-white text at three opacities */
+  --text-1: rgba(255, 255, 245, 0.86);
+  --text-2: rgba(235, 235, 245, 0.6);
+  --text-3: rgba(235, 235, 245, 0.38);
+
   --green: #66bb6a;
   --red: #ef5350;
   --orange: #ffb74d;
+
+  /* Radii scale: input 6 / button 8 / stage 10 / panel 12 / pill */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
   --radius: 12px;
+  --radius-pill: 999px;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 120ms;
+
+  --font-sans: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+    Cantarell, 'Fira Sans', 'Helvetica Neue', sans-serif;
 }
 
 * {
@@ -24,7 +50,10 @@
 
 body {
   background: var(--bg);
+  background-image: url('./wavy-lines.svg');
+  background-size: cover;
   color: var(--text-1);
+  font-family: var(--font-sans);
   user-select: none;
   overflow: hidden;
 }
@@ -47,8 +76,14 @@ body {
   justify-content: space-between;
   padding: 14px 22px;
   border-bottom: 1px solid var(--border);
-  background: var(--bg-card);
+  background: var(--bg-shell);
   flex-shrink: 0;
+}
+
+.brand-mark {
+  width: 30px;
+  height: 30px;
+  align-self: center;
 }
 
 .brand {
@@ -57,11 +92,16 @@ body {
   gap: 10px;
 }
 
+.brand > .brand-mark {
+  align-self: center;
+  margin-right: 2px;
+}
+
 .brand-name {
   font-size: 1.3rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  background: linear-gradient(90deg, #4fc3f7, #81d4fa, #4dd0e1);
+  background: var(--tilmoch-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -193,14 +233,18 @@ body {
 
 .btn {
   padding: 10px 20px;
-  border-radius: 9px;
+  border-radius: var(--radius-md);
   border: none;
   font-size: 0.92rem;
   font-weight: 600;
   cursor: pointer;
   color: #fff;
   white-space: nowrap;
-  transition: filter 0.15s;
+  transition: background var(--dur-fast) var(--ease-out), filter var(--dur-fast) var(--ease-out);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
 }
 
 .btn:hover:not(:disabled) {
@@ -261,7 +305,7 @@ body {
 .meter-track {
   width: 100%;
   height: 10px;
-  border-radius: 5px;
+  border-radius: var(--radius-pill);
   background: var(--bg-inset);
   border: 1px solid var(--border);
   overflow: hidden;
@@ -306,19 +350,25 @@ body {
 .stage-row select,
 .stage-row input {
   padding: 8px 11px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border-strong);
   background: var(--bg-card);
   color: var(--text-1);
   font-size: 0.85rem;
   width: 100%;
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.stage-row select:hover,
+.stage-row input:hover {
+  border-color: var(--gray-1);
 }
 
 .stage-row select:focus,
 .stage-row input:focus {
   border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.25);
 }
 
 .stage-error {
@@ -404,9 +454,9 @@ body {
 
 .subtitle-pair {
   padding: 7px 10px;
-  border-radius: 8px;
-  opacity: 0.6;
-  transition: opacity 0.2s;
+  border-radius: var(--radius-md);
+  opacity: 0.65;
+  transition: opacity 0.2s var(--ease-out);
 }
 
 .subtitle-pair.latest {

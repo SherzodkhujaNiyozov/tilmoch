@@ -27,6 +27,9 @@ const api = {
   speak: (text: string, voice: string): Promise<Uint8Array> =>
     ipcRenderer.invoke('tts:speak', text, voice),
 
+  installVbCable: (): Promise<{ ok: boolean; step: string; error?: string }> =>
+    ipcRenderer.invoke('vbcable:install'),
+
   toggleOverlay: (): Promise<boolean> => ipcRenderer.invoke('overlay:toggle'),
   isOverlayOpen: (): Promise<boolean> => ipcRenderer.invoke('overlay:is-open'),
   sendOverlayLine: (line: { id: number; src: string; dst: string | null }): void =>

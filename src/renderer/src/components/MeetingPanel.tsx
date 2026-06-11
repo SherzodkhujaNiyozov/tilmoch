@@ -24,6 +24,8 @@ export function MeetingPanel(): React.JSX.Element {
   const [micId, setMicId] = useState('')
   const [voice, setVoice] = useState('')
   const [micError, setMicError] = useState<string | null>(null)
+  const [installing, setInstalling] = useState(false)
+  const [installMsg, setInstallMsg] = useState<string | null>(null)
   const lastSpokenId = useRef(-1)
 
   const { status, error, lines, level, clearLines } = useStt(
@@ -78,6 +80,29 @@ export function MeetingPanel(): React.JSX.Element {
       }
     }
   }, [lines, settings, voice, enqueue])
+
+  // VB-Cable aniqlangan zahoti, TTS chiqishi tanlanmagan bo'lsa, avtomatik tanlaymiz
+  const cableDevice = outputs.find((o) => /cable input/i.test(o.label))
+  useEffect(() => {
+    if (cableDevice && settings && !settings.meeting.outputDeviceId) {
+      const next = {
+        ...settings,
+        meeting: { ...settings.meeting, outputDeviceId: cableDevice.id }
+      }
+      setSettings(next)
+      void window.api.saveSettings(next)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cableDevice?.id, settings?.meeting.outputDeviceId])
+
+  const installCable = async (): Promise<void> => {
+    setInstalling(true)
+    setInstallMsg(t('meeting.installing'))
+    const r = await window.api.installVbCable()
+    setInstalling(false)
+    setInstallMsg(r.ok ? t('meeting.installDone') : `${t('meeting.installFailed')}: ${r.error}`)
+    refreshOutputs()
+  }
 
   const updateMeeting = (patch: Partial<AppSettings['meeting']>): void => {
     if (!settings) return
@@ -202,8 +227,16 @@ export function MeetingPanel(): React.JSX.Element {
 
       {(micError || error) && <p className="error">{micError ?? error}</p>}
 
-      {!settings.meeting.outputDeviceId && (
-        <p className="stage-error">{t('meeting.warnDefaultOut')}</p>
+      {!settings.meeting.outputDeviceId && !cableDevice && (
+        <div className="stage">
+          <p className="stage-error">{t('meeting.warnDefaultOut')}</p>
+          <div className="settings-actions">
+            <button className="btn btn-start" onClick={installCable} disabled={installing}>
+              {installing ? '⏳ …' : `⬇️ ${t('meeting.installCable')}`}
+            </button>
+          </div>
+          {installMsg && <p className="status">{installMsg}</p>}
+        </div>
       )}
 
       {micStream && (

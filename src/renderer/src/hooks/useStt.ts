@@ -104,6 +104,13 @@ export function useStt(stream: MediaStream | null): SttState {
       let batch: Float32Array[] = []
       let batchLen = 0
       node.port.onmessage = (e: MessageEvent<Float32Array>) => {
+        // TTS o'z tarjimamizni o'qiyotganda oqimni to'xtatamiz —
+        // aks holda loopback TTS ovozini qayta ushlab, cheksiz halqa bo'ladi.
+        if (ttsPlaying.current) {
+          batch = []
+          batchLen = 0
+          return
+        }
         batch.push(e.data)
         batchLen += e.data.length
         if (batchLen >= 1024 && ws && ws.readyState === WebSocket.OPEN) {

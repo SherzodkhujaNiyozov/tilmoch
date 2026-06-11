@@ -275,13 +275,37 @@ body {
   font-size: 0.85rem;
 }
 
-.subtitle-line {
-  font-size: 0.92rem;
-  color: var(--ev-c-text-2);
+.subtitle-pair {
+  padding: 6px 8px;
+  border-radius: 6px;
+  opacity: 0.65;
+}
+
+.subtitle-pair.latest {
+  opacity: 1;
+  background: rgba(79, 195, 247, 0.06);
+}
+
+.subtitle-src {
+  font-size: 0.78rem;
+  color: var(--ev-c-text-3);
+  line-height: 1.4;
+}
+
+.subtitle-dst {
+  font-size: 0.95rem;
+  color: var(--ev-c-text-1);
+  font-weight: 500;
   line-height: 1.45;
 }
 
-.subtitle-line.latest {
-  color: var(--ev-c-text-1);
-  font-weight: 500;
+.subtitle-dst.pending {
+  color: var(--ev-c-text-3);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.subtitle-dst-error {
+  font-size: 0.8rem;
+  color: #ef9a9a;
 }

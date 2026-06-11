@@ -34,9 +34,16 @@ export function SubtitleView({ stream }: { stream: MediaStream | null }): React.
           </p>
         ) : (
           lines.map((line, i) => (
-            <p key={i} className={`subtitle-line ${i === lines.length - 1 ? 'latest' : ''}`}>
-              {line}
-            </p>
+            <div key={line.id} className={`subtitle-pair ${i === lines.length - 1 ? 'latest' : ''}`}>
+              <p className="subtitle-src">{line.src}</p>
+              {line.dst !== null ? (
+                <p className="subtitle-dst">{line.dst}</p>
+              ) : line.dstError ? (
+                <p className="subtitle-dst-error">tarjima xatosi: {line.dstError}</p>
+              ) : (
+                <p className="subtitle-dst pending">tarjima qilinmoqda…</p>
+              )}
+            </div>
           ))
         )}
       </div>

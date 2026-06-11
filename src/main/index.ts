@@ -5,6 +5,7 @@ import { initMain as initAudioLoopback } from 'electron-audio-loopback'
 import { registerSettingsIpc } from './settings'
 import { registerOllamaIpc } from './ollama'
 import { registerTtsIpc } from './tts'
+import { registerTranslateIpc } from './translate'
 import icon from '../../resources/icon.png?asset'
 
 // Must be called before app is ready — registers the loopback
@@ -63,6 +64,7 @@ app.whenReady().then(() => {
   registerSettingsIpc()
   registerOllamaIpc()
   registerTtsIpc()
+  registerTranslateIpc()
 
   createWindow()
 

@@ -1,21 +1,30 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const STT_URL = 'ws://127.0.0.1:8765'
+
+export interface SubtitleLine {
+  id: number
+  src: string // asl transkripsiya
+  dst: string | null // tarjima (null = hali kelmagan)
+  dstError: string | null
+}
 
 export interface SttState {
   status: 'idle' | 'connecting' | 'ready' | 'error'
   error: string | null
-  lines: string[] // final transkripsiya qatorlari (oxirgisi eng yangi)
+  lines: SubtitleLine[] // oxirgisi eng yangi
 }
 
 /**
  * Capture stream'ni 16kHz mono int16 PCM ko'rinishida Python STT serverga
- * oqim qilib yuboradi va kelgan transkripsiyalarni yig'adi.
+ * oqim qilib yuboradi, kelgan transkripsiyalarni yig'adi va har segmentni
+ * darhol tarjimaga (main process -> Ollama/OpenAI) jo'natadi.
  */
 export function useStt(stream: MediaStream | null): SttState {
   const [status, setStatus] = useState<SttState['status']>('idle')
   const [error, setError] = useState<string | null>(null)
-  const [lines, setLines] = useState<string[]>([])
+  const [lines, setLines] = useState<SubtitleLine[]>([])
+  const nextId = useRef(0)
 
   useEffect(() => {
     if (!stream) {
@@ -43,11 +52,32 @@ export function useStt(stream: MediaStream | null): SttState {
         )
       }
 
+      const translateLine = (id: number, text: string): void => {
+        window.api
+          .translate(text)
+          .then((r) => {
+            setLines((prev) =>
+              prev.map((l) =>
+                l.id === id
+                  ? { ...l, dst: r.ok ? r.text : null, dstError: r.ok ? null : (r.error ?? null) }
+                  : l
+              )
+            )
+          })
+          .catch((err) => {
+            setLines((prev) =>
+              prev.map((l) => (l.id === id ? { ...l, dstError: String(err) } : l))
+            )
+          })
+      }
+
       ws.onmessage = (e) => {
         const msg = JSON.parse(e.data as string)
         if (msg.type === 'ready') setStatus('ready')
         else if (msg.type === 'final' && msg.text) {
-          setLines((prev) => [...prev.slice(-19), msg.text])
+          const line: SubtitleLine = { id: nextId.current++, src: msg.text, dst: null, dstError: null }
+          setLines((prev) => [...prev.slice(-19), line])
+          translateLine(line.id, line.src)
         } else if (msg.type === 'error') {
           setError(msg.message)
           setStatus('error')

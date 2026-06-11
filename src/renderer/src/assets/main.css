@@ -117,3 +117,89 @@ body {
   font-size: 0.85rem;
   color: #ef5350;
 }
+
+/* Settings */
+.app {
+  max-height: 100vh;
+  overflow-y: auto;
+  padding: 32px 0;
+}
+
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 10px;
+  background: var(--ev-c-black-mute);
+  border: 1px solid var(--ev-c-gray-3);
+}
+
+.stage h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ev-c-text-1);
+}
+
+.stage-row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.stage-row label {
+  font-size: 0.8rem;
+  color: var(--ev-c-text-2);
+}
+
+.stage-row select,
+.stage-row input {
+  padding: 7px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--ev-c-gray-2);
+  background: var(--ev-c-black-soft);
+  color: var(--ev-c-text-1);
+  font-size: 0.85rem;
+  width: 100%;
+}
+
+.stage-error {
+  font-size: 0.78rem;
+  color: #ffb74d;
+}
+
+.settings-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-secondary {
+  background: var(--ev-c-gray-2);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--ev-c-gray-1);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.saved-badge {
+  font-size: 0.85rem;
+  color: #66bb6a;
+}

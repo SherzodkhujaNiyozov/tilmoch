@@ -1,4 +1,5 @@
 import { useSystemAudio } from './hooks/useSystemAudio'
+import { SettingsPanel } from './components/SettingsPanel'
 
 function App(): React.JSX.Element {
   const { capturing, level, error, start, stop } = useSystemAudio()
@@ -35,6 +36,10 @@ function App(): React.JSX.Element {
         <p className="status">
           {capturing ? 'Capturing… musiqa yoki video qoʻying — meter harakatlanishi kerak.' : 'Idle'}
         </p>
+      </main>
+
+      <main className="panel">
+        <SettingsPanel />
       </main>
     </div>
   )

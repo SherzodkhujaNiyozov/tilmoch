@@ -23,7 +23,8 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
-    "electron-audio-loopback": "^1.0.6"
+    "electron-audio-loopback": "^1.0.6",
+    "msedge-tts": "^2.0.5"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",

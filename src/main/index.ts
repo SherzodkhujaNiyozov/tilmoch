@@ -2,6 +2,9 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { initMain as initAudioLoopback } from 'electron-audio-loopback'
+import { registerSettingsIpc } from './settings'
+import { registerOllamaIpc } from './ollama'
+import { registerTtsIpc } from './tts'
 import icon from '../../resources/icon.png?asset'
 
 // Must be called before app is ready — registers the loopback
@@ -56,6 +59,10 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+
+  registerSettingsIpc()
+  registerOllamaIpc()
+  registerTtsIpc()
 
   createWindow()
 

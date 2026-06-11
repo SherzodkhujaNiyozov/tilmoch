@@ -1,10 +1,25 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
+import type { AppSettings } from '../shared/settings'
 
 // Custom APIs for renderer
 const api = {
   enableLoopbackAudio: (): Promise<void> => ipcRenderer.invoke('enable-loopback-audio'),
-  disableLoopbackAudio: (): Promise<void> => ipcRenderer.invoke('disable-loopback-audio')
+  disableLoopbackAudio: (): Promise<void> => ipcRenderer.invoke('disable-loopback-audio'),
+
+  getSettings: (): Promise<AppSettings> => ipcRenderer.invoke('settings:get'),
+  saveSettings: (settings: AppSettings): Promise<void> =>
+    ipcRenderer.invoke('settings:save', settings),
+
+  listOllamaModels: (
+    endpoint: string
+  ): Promise<{ ok: boolean; models: string[]; error?: string }> =>
+    ipcRenderer.invoke('ollama:list', endpoint),
+
+  listTtsVoices: (): Promise<{ name: string; locale: string; gender: string }[]> =>
+    ipcRenderer.invoke('tts:voices'),
+  speak: (text: string, voice: string): Promise<Uint8Array> =>
+    ipcRenderer.invoke('tts:speak', text, voice)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

@@ -28,11 +28,17 @@ function stripThinking(text: string): string {
 
 function buildPrompt(targetLang: string): string {
   const target = LANG_NAMES[targetLang] ?? targetLang
-  return (
+  let prompt =
     `You are a professional subtitle translator. Translate each user message into ${target}. ` +
     `Rules: output ONLY the translation, nothing else. No explanations, no quotes, no notes. ` +
     `Keep the tone and register of the original. If a fragment is unintelligible noise, output an empty string.`
-  )
+  if (targetLang === 'uz') {
+    // Kichik modellar o'zbekchada kirillga o'tib ketadi yoki ruscha so'z aralashtirib yuboradi.
+    prompt +=
+      ` Use the LATIN script (o'zbek lotin alifbosi) only — never Cyrillic. ` +
+      `Use natural, everyday Uzbek and never mix in Russian words.`
+  }
+  return prompt
 }
 
 async function translateWithOllama(text: string): Promise<TranslateResult> {

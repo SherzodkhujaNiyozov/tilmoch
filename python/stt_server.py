@@ -18,6 +18,7 @@ import glob
 import json
 import logging
 import os
+import time
 
 import numpy as np
 import websockets
@@ -93,6 +94,11 @@ async def handle(ws):
     has_speech = False
     prev_text = ""  # oldingi segment matni — modelga kontekst sifatida beriladi
 
+    # Diagnostika: har 5 sekundda qabul qilingan audio statistikasi
+    stat_samples = 0
+    stat_max_rms = 0.0
+    stat_last = time.monotonic()
+
     def transcribe(audio: np.ndarray) -> str:
         segments, _info = model.transcribe(
             audio,
@@ -130,6 +136,19 @@ async def handle(ws):
         buf = np.concatenate([buf, chunk])
 
         rms = float(np.sqrt(np.mean(chunk**2))) if len(chunk) else 0.0
+
+        stat_samples += len(chunk)
+        stat_max_rms = max(stat_max_rms, rms)
+        now = time.monotonic()
+        if now - stat_last >= 5:
+            log.info(
+                "stats: %.1fs audio qabul qilindi, max RMS %.4f (chegara %.4f), speech=%s, bufer %.1fs",
+                stat_samples / SAMPLE_RATE, stat_max_rms, SILENCE_RMS, has_speech, len(buf) / SAMPLE_RATE,
+            )
+            stat_samples = 0
+            stat_max_rms = 0.0
+            stat_last = now
+
         if rms < SILENCE_RMS:
             silence_samples += len(chunk)
         else:

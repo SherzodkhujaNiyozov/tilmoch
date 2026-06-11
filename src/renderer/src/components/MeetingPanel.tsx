@@ -4,7 +4,7 @@ import { LANGUAGES } from '../providers'
 import { useStt } from '../hooks/useStt'
 import { useTtsQueue } from '../hooks/useTtsQueue'
 
-interface AudioOutput {
+interface AudioDevice {
   id: string
   label: string
 }
@@ -17,12 +17,14 @@ interface AudioOutput {
 export function MeetingPanel(): React.JSX.Element {
   const [settings, setSettings] = useState<AppSettings | null>(null)
   const [micStream, setMicStream] = useState<MediaStream | null>(null)
-  const [outputs, setOutputs] = useState<AudioOutput[]>([])
+  const [outputs, setOutputs] = useState<AudioDevice[]>([])
+  const [mics, setMics] = useState<AudioDevice[]>([])
+  const [micId, setMicId] = useState('')
   const [voice, setVoice] = useState('')
   const [micError, setMicError] = useState<string | null>(null)
   const lastSpokenId = useRef(-1)
 
-  const { status, error, lines } = useStt(
+  const { status, error, lines, level } = useStt(
     micStream,
     settings
       ? { language: settings.meeting.myLang, targetLang: settings.meeting.partnerLang }
@@ -34,13 +36,21 @@ export function MeetingPanel(): React.JSX.Element {
     window.api.getSettings().then(setSettings)
   }, [])
 
-  // Chiqish qurilmalari ro'yxati (virtual cable shu yerda ko'rinadi)
+  // Kirish/chiqish qurilmalari ro'yxati (virtual cable chiqishlarda ko'rinadi)
   const refreshOutputs = useCallback(() => {
     navigator.mediaDevices.enumerateDevices().then((devices) => {
       setOutputs(
         devices
           .filter((d) => d.kind === 'audiooutput')
           .map((d) => ({ id: d.deviceId, label: d.label || `Qurilma ${d.deviceId.slice(0, 6)}` }))
+      )
+      setMics(
+        devices
+          .filter((d) => d.kind === 'audioinput')
+          .map((d) => ({
+            id: d.deviceId,
+            label: d.label || `Mikrofon ${d.deviceId.slice(0, 6)}`
+          }))
       )
     })
   }, [])
@@ -78,7 +88,11 @@ export function MeetingPanel(): React.JSX.Element {
     setMicError(null)
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: true, noiseSuppression: true }
+        audio: {
+          ...(micId && { deviceId: { exact: micId } }),
+          echoCancellation: true,
+          noiseSuppression: true
+        }
       })
       setMicStream(stream)
       refreshOutputs() // ruxsatdan keyin qurilma nomlari ko'rinadi
@@ -99,7 +113,7 @@ export function MeetingPanel(): React.JSX.Element {
   return (
     <div className="settings">
       <div className="subtitles-header">
-        <h2>Meeting rejimi</h2>
+        <h2>⬆️ Chiquvchi tarjima — sizning gapingiz (meeting)</h2>
         {micStream && (
           <span className={`stt-status stt-${status}`}>
             {speaking ? '🔊 Tarjima yuborilmoqda…' : status === 'ready' ? '🎙️ Gapiravering' : '…'}
@@ -145,6 +159,23 @@ export function MeetingPanel(): React.JSX.Element {
         </div>
 
         <div className="stage-row">
+          <label>Mikrofon</label>
+          <div className="model-select">
+            <select value={micId} onChange={(e) => setMicId(e.target.value)} disabled={!!micStream}>
+              <option value="">Default mikrofon</option>
+              {mics.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.label}
+                </option>
+              ))}
+            </select>
+            <button className="btn-refresh" title="Qurilmalarni yangilash" onClick={refreshOutputs}>
+              ↻
+            </button>
+          </div>
+        </div>
+
+        <div className="stage-row">
           <label>TTS chiqishi</label>
           <div className="model-select">
             <select
@@ -172,6 +203,12 @@ export function MeetingPanel(): React.JSX.Element {
       </div>
 
       {(micError || error) && <p className="error">{micError ?? error}</p>}
+
+      {micStream && (
+        <div className="meter-track">
+          <div className="meter-fill" style={{ width: `${Math.round(level * 100)}%` }} />
+        </div>
+      )}
 
       {micStream ? (
         <button className="btn btn-stop" onClick={stop}>

@@ -14,9 +14,11 @@ function App(): React.JSX.Element {
       </header>
 
       <main className="panel">
-        <h2>System Audio Capture (POC)</h2>
+        <h2>⬇️ Kiruvchi tarjima — video va suhbatdosh ovozi</h2>
         <p className="hint">
-          Noutbukdan chiqayotgan ovozni ushlaymiz — video/YouTube tarjimasi uchun birinchi qadam.
+          Noutbukdan chiqayotgan har qanday ovozni (YouTube, video, Zoom'dagi suhbatdosh gapi)
+          tahlil qilib, pastdagi Subtitle panelida tarjima qiladi. Suhbatdoshni tushunish uchun
+          shu tugmani bosing.
         </p>
 
         <div className="meter-track">
@@ -27,16 +29,18 @@ function App(): React.JSX.Element {
 
         {capturing ? (
           <button className="btn btn-stop" onClick={stop}>
-            Stop capture
+            Kiruvchi tarjimani toʻxtatish
           </button>
         ) : (
           <button className="btn btn-start" onClick={start}>
-            Start system audio capture
+            ⬇️ Kiruvchi tarjimani boshlash
           </button>
         )}
 
         <p className="status">
-          {capturing ? 'Capturing… musiqa yoki video qoʻying — meter harakatlanishi kerak.' : 'Idle'}
+          {capturing
+            ? 'Tinglayapman… video qoʻying yoki suhbatdosh gapirsin — meter harakatlanadi.'
+            : 'Oʻchiq'}
         </p>
       </main>
 

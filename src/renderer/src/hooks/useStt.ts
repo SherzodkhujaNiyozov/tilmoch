@@ -14,6 +14,7 @@ export interface SttState {
   status: 'idle' | 'connecting' | 'ready' | 'error'
   error: string | null
   lines: SubtitleLine[] // oxirgisi eng yangi
+  level: number // 0..1 — kirayotgan audio darajasi (diagnostika uchun)
 }
 
 /**
@@ -30,6 +31,7 @@ export function useStt(stream: MediaStream | null, options?: SttOptions): SttSta
   const [status, setStatus] = useState<SttState['status']>('idle')
   const [error, setError] = useState<string | null>(null)
   const [lines, setLines] = useState<SubtitleLine[]>([])
+  const [level, setLevel] = useState(0)
   const nextId = useRef(0)
 
   // options ref orqali — har render'da WS qayta ulanib ketmasin
@@ -129,13 +131,16 @@ export function useStt(stream: MediaStream | null, options?: SttOptions): SttSta
         if (batchLen >= 1024 && ws && ws.readyState === WebSocket.OPEN) {
           const pcm = new Int16Array(batchLen)
           let off = 0
+          let sumSq = 0
           for (const f of batch) {
             for (let i = 0; i < f.length; i++) {
               const s = Math.max(-1, Math.min(1, f[i]))
+              sumSq += s * s
               pcm[off++] = s < 0 ? s * 0x8000 : s * 0x7fff
             }
           }
           ws.send(pcm.buffer)
+          setLevel(Math.min(1, Math.sqrt(sumSq / batchLen) * 4))
           batch = []
           batchLen = 0
         }
@@ -156,8 +161,9 @@ export function useStt(stream: MediaStream | null, options?: SttOptions): SttSta
       cancelled = true
       ws?.close()
       audioCtx?.close()
+      setLevel(0)
     }
   }, [stream])
 
-  return { status, error, lines }
+  return { status, error, lines, level }
 }

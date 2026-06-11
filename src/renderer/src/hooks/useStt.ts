@@ -21,11 +21,20 @@ export interface SttState {
  * oqim qilib yuboradi, kelgan transkripsiyalarni yig'adi va har segmentni
  * darhol tarjimaga (main process -> Ollama/OpenAI) jo'natadi.
  */
-export function useStt(stream: MediaStream | null): SttState {
+export interface SttOptions {
+  language?: string // STT manba tili ('auto' mumkin); berilmasa settings.sourceLang
+  targetLang?: string // tarjima tili; berilmasa settings.targetLang
+}
+
+export function useStt(stream: MediaStream | null, options?: SttOptions): SttState {
   const [status, setStatus] = useState<SttState['status']>('idle')
   const [error, setError] = useState<string | null>(null)
   const [lines, setLines] = useState<SubtitleLine[]>([])
   const nextId = useRef(0)
+
+  // options ref orqali — har render'da WS qayta ulanib ketmasin
+  const optsRef = useRef(options)
+  optsRef.current = options
 
   useEffect(() => {
     if (!stream) {
@@ -49,13 +58,16 @@ export function useStt(stream: MediaStream | null): SttState {
 
       ws.onopen = () => {
         ws!.send(
-          JSON.stringify({ model: settings.stt.model, language: settings.sourceLang })
+          JSON.stringify({
+            model: settings.stt.model,
+            language: optsRef.current?.language ?? settings.sourceLang
+          })
         )
       }
 
       const translateLine = (id: number, text: string): void => {
         window.api
-          .translate(text)
+          .translate(text, optsRef.current?.targetLang)
           .then((r) => {
             setLines((prev) =>
               prev.map((l) =>

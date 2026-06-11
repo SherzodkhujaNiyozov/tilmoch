@@ -16,8 +16,11 @@ const api = {
   ): Promise<{ ok: boolean; models: string[]; error?: string }> =>
     ipcRenderer.invoke('ollama:list', endpoint),
 
-  translate: (text: string): Promise<{ ok: boolean; text: string; error?: string }> =>
-    ipcRenderer.invoke('translate:text', text),
+  translate: (
+    text: string,
+    targetLang?: string
+  ): Promise<{ ok: boolean; text: string; error?: string }> =>
+    ipcRenderer.invoke('translate:text', text, targetLang),
 
   listTtsVoices: (): Promise<{ name: string; locale: string; gender: string }[]> =>
     ipcRenderer.invoke('tts:voices'),

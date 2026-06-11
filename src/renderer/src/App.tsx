@@ -1,6 +1,7 @@
 import { useSystemAudio } from './hooks/useSystemAudio'
 import { SettingsPanel } from './components/SettingsPanel'
 import { SubtitleView } from './components/SubtitleView'
+import { MeetingPanel } from './components/MeetingPanel'
 
 function App(): React.JSX.Element {
   const { capturing, level, error, stream, start, stop } = useSystemAudio()
@@ -41,6 +42,10 @@ function App(): React.JSX.Element {
 
       <main className="panel">
         <SubtitleView stream={stream} />
+      </main>
+
+      <main className="panel">
+        <MeetingPanel />
       </main>
 
       <main className="panel">

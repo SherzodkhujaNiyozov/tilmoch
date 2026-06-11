@@ -12,7 +12,10 @@ declare global {
       listOllamaModels: (
         endpoint: string
       ) => Promise<{ ok: boolean; models: string[]; error?: string }>
-      translate: (text: string) => Promise<{ ok: boolean; text: string; error?: string }>
+      translate: (
+        text: string,
+        targetLang?: string
+      ) => Promise<{ ok: boolean; text: string; error?: string }>
       listTtsVoices: () => Promise<{ name: string; locale: string; gender: string }[]>
       speak: (text: string, voice: string) => Promise<Uint8Array>
     }

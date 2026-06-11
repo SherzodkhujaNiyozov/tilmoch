@@ -15,7 +15,8 @@ export function loadSettings(): AppSettings {
         ...raw,
         stt: { ...DEFAULT_SETTINGS.stt, ...raw.stt },
         translate: { ...DEFAULT_SETTINGS.translate, ...raw.translate },
-        tts: { ...DEFAULT_SETTINGS.tts, ...raw.tts }
+        tts: { ...DEFAULT_SETTINGS.tts, ...raw.tts },
+        meeting: { ...DEFAULT_SETTINGS.meeting, ...raw.meeting }
       }
     }
   } catch (e) {

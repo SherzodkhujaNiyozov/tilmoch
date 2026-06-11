@@ -41,7 +41,7 @@ function buildPrompt(targetLang: string): string {
   return prompt
 }
 
-async function translateWithOllama(text: string): Promise<TranslateResult> {
+async function translateWithOllama(text: string, target: string): Promise<TranslateResult> {
   const s = loadSettings()
   const base = (s.translate.endpoint || 'http://localhost:11434').replace(/\/+$/, '')
   const res = await fetch(`${base}/api/chat`, {
@@ -54,7 +54,7 @@ async function translateWithOllama(text: string): Promise<TranslateResult> {
       keep_alive: '30m', // model VRAMda qolsin — har segmentda qayta yuklanmasin
       options: { temperature: 0.2 },
       messages: [
-        { role: 'system', content: buildPrompt(s.targetLang) },
+        { role: 'system', content: buildPrompt(target) },
         { role: 'user', content: text }
       ]
     })
@@ -69,12 +69,12 @@ async function translateWithOllama(text: string): Promise<TranslateResult> {
  * Ogohlantirish: norasmiy — Google cheklashi yoki o'zgartirishi mumkin,
  * shuning uchun bu provider'lardan biri xolos, yagona yo'l emas.
  */
-async function translateWithGoogleFree(text: string): Promise<TranslateResult> {
+async function translateWithGoogleFree(text: string, target: string): Promise<TranslateResult> {
   const s = loadSettings()
   const sl = s.sourceLang === 'auto' ? 'auto' : s.sourceLang
   const url =
     `https://translate.googleapis.com/translate_a/single?client=gtx` +
-    `&sl=${sl}&tl=${s.targetLang}&dt=t&q=${encodeURIComponent(text)}`
+    `&sl=${sl}&tl=${target}&dt=t&q=${encodeURIComponent(text)}`
   const res = await fetch(url, {
     headers: { 'User-Agent': 'Mozilla/5.0' },
     signal: AbortSignal.timeout(10000)
@@ -85,7 +85,7 @@ async function translateWithGoogleFree(text: string): Promise<TranslateResult> {
   return { ok: true, text: out.trim() }
 }
 
-async function translateWithDeepL(text: string): Promise<TranslateResult> {
+async function translateWithDeepL(text: string, target: string): Promise<TranslateResult> {
   const s = loadSettings()
   const key = s.translate.apiKey
   // Bepul tier kalitlari ':fx' bilan tugaydi va alohida hostda ishlaydi.
@@ -99,7 +99,7 @@ async function translateWithDeepL(text: string): Promise<TranslateResult> {
     signal: AbortSignal.timeout(15000),
     body: JSON.stringify({
       text: [text],
-      target_lang: s.targetLang.toUpperCase(),
+      target_lang: target.toUpperCase(),
       ...(s.sourceLang !== 'auto' && { source_lang: s.sourceLang.toUpperCase() })
     })
   })
@@ -111,7 +111,7 @@ async function translateWithDeepL(text: string): Promise<TranslateResult> {
   return { ok: true, text: (data.translations?.[0]?.text ?? '').trim() }
 }
 
-async function translateWithOpenAI(text: string): Promise<TranslateResult> {
+async function translateWithOpenAI(text: string, target: string): Promise<TranslateResult> {
   const s = loadSettings()
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -124,7 +124,7 @@ async function translateWithOpenAI(text: string): Promise<TranslateResult> {
       model: s.translate.model || 'gpt-4o-mini',
       temperature: 0.2,
       messages: [
-        { role: 'system', content: buildPrompt(s.targetLang) },
+        { role: 'system', content: buildPrompt(target) },
         { role: 'user', content: text }
       ]
     })
@@ -135,16 +135,21 @@ async function translateWithOpenAI(text: string): Promise<TranslateResult> {
 }
 
 export function registerTranslateIpc(): void {
-  ipcMain.handle('translate:text', async (_e, text: string): Promise<TranslateResult> => {
-    try {
-      const provider = loadSettings().translate.provider
-      if (provider === 'google-free') return await translateWithGoogleFree(text)
-      if (provider === 'ollama') return await translateWithOllama(text)
-      if (provider === 'deepl') return await translateWithDeepL(text)
-      if (provider === 'openai') return await translateWithOpenAI(text)
-      return { ok: false, text: '', error: `Provider '${provider}' hali qo'llanmaydi` }
-    } catch (e) {
-      return { ok: false, text: '', error: e instanceof Error ? e.message : String(e) }
+  ipcMain.handle(
+    'translate:text',
+    async (_e, text: string, targetLang?: string): Promise<TranslateResult> => {
+      try {
+        const s = loadSettings()
+        const target = targetLang || s.targetLang
+        const provider = s.translate.provider
+        if (provider === 'google-free') return await translateWithGoogleFree(text, target)
+        if (provider === 'ollama') return await translateWithOllama(text, target)
+        if (provider === 'deepl') return await translateWithDeepL(text, target)
+        if (provider === 'openai') return await translateWithOpenAI(text, target)
+        return { ok: false, text: '', error: `Provider '${provider}' hali qo'llanmaydi` }
+      } catch (e) {
+        return { ok: false, text: '', error: e instanceof Error ? e.message : String(e) }
+      }
     }
-  })
+  )
 }

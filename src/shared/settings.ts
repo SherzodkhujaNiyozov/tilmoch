@@ -5,12 +5,19 @@ export interface StageConfig {
   endpoint: string
 }
 
+export interface MeetingSettings {
+  myLang: string // men gapiradigan til
+  partnerLang: string // suhbatdosh eshitadigan til
+  outputDeviceId: string // TTS chiqadigan qurilma (virtual cable), '' = default
+}
+
 export interface AppSettings {
   sourceLang: string // 'auto' yoki BCP-47 prefiksi: 'en', 'ja', ...
   targetLang: string
   stt: StageConfig
   translate: StageConfig
   tts: StageConfig
+  meeting: MeetingSettings
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -33,5 +40,10 @@ export const DEFAULT_SETTINGS: AppSettings = {
     model: 'uz-UZ-MadinaNeural',
     apiKey: '',
     endpoint: ''
+  },
+  meeting: {
+    myLang: 'uz',
+    partnerLang: 'en',
+    outputDeviceId: ''
   }
 }

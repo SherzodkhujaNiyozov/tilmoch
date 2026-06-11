@@ -7,6 +7,7 @@ import { registerOllamaIpc } from './ollama'
 import { registerTtsIpc } from './tts'
 import { registerTranslateIpc } from './translate'
 import { registerOverlayIpc, openOverlay, closeOverlay } from './overlay'
+import { startSttServer } from './sttServer'
 import icon from '../../resources/icon.png?asset'
 
 // Must be called before app is ready — registers the loopback
@@ -74,6 +75,9 @@ app.whenReady().then(() => {
   registerTtsIpc()
   registerTranslateIpc()
   registerOverlayIpc()
+
+  // STT serverni app o'zi boshqaradi: ishga tushiradi, o'chsa qayta ko'taradi
+  startSttServer()
 
   createWindow()
 

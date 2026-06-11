@@ -51,6 +51,8 @@ export function useStt(stream: MediaStream | null, options?: SttOptions): SttSta
     let audioCtx: AudioContext | null = null
     let cancelled = false
 
+    let reconnectTimer: ReturnType<typeof setTimeout> | undefined
+
     const run = async (): Promise<void> => {
       setStatus('connecting')
       setError(null)
@@ -58,16 +60,36 @@ export function useStt(stream: MediaStream | null, options?: SttOptions): SttSta
 
       const settings = await window.api.getSettings()
 
-      ws = new WebSocket(STT_URL)
-      ws.binaryType = 'arraybuffer'
+      // Server qayta ko'tarilayotgan bo'lishi mumkin (auto-spawn) —
+      // ulanish uzilsa, stream faol ekan har 2.5s da qayta urinamiz.
+      const connectWs = (): void => {
+        if (cancelled) return
+        setStatus('connecting')
+        ws = new WebSocket(STT_URL)
+        ws.binaryType = 'arraybuffer'
 
-      ws.onopen = () => {
-        ws!.send(
-          JSON.stringify({
-            model: settings.stt.model,
-            language: optsRef.current?.language ?? settings.sourceLang
-          })
-        )
+        ws.onopen = () => {
+          setError(null)
+          ws!.send(
+            JSON.stringify({
+              model: settings.stt.model,
+              language: optsRef.current?.language ?? settings.sourceLang
+            })
+          )
+        }
+
+        ws.onmessage = handleMessage
+
+        ws.onclose = () => {
+          if (cancelled) return
+          setStatus('connecting')
+          setError(i18n.t('stt.connectError'))
+          reconnectTimer = setTimeout(connectWs, 2500)
+        }
+
+        ws.onerror = () => {
+          // onclose baribir keladi — reconnect o'sha yerda
+        }
       }
 
       const translateLine = (id: number, text: string): void => {
@@ -90,7 +112,7 @@ export function useStt(stream: MediaStream | null, options?: SttOptions): SttSta
           })
       }
 
-      ws.onmessage = (e) => {
+      const handleMessage = (e: MessageEvent): void => {
         const msg = JSON.parse(e.data as string)
         if (msg.type === 'ready') setStatus('ready')
         else if (msg.type === 'final' && msg.text) {
@@ -106,12 +128,7 @@ export function useStt(stream: MediaStream | null, options?: SttOptions): SttSta
         }
       }
 
-      ws.onerror = () => {
-        if (!cancelled) {
-          setError(i18n.t('stt.connectError'))
-          setStatus('error')
-        }
-      }
+      connectWs()
 
       // 16kHz kontekst — brauzer o'zi resample qiladi.
       // Worklet alohida fayl (public/pcm-worklet.js): CSP blob: skriptlarga ruxsat bermaydi.
@@ -166,6 +183,7 @@ export function useStt(stream: MediaStream | null, options?: SttOptions): SttSta
 
     return () => {
       cancelled = true
+      clearTimeout(reconnectTimer)
       ws?.close()
       audioCtx?.close()
       setLevel(0)

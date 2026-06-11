@@ -25,7 +25,16 @@ const api = {
   listTtsVoices: (): Promise<{ name: string; locale: string; gender: string }[]> =>
     ipcRenderer.invoke('tts:voices'),
   speak: (text: string, voice: string): Promise<Uint8Array> =>
-    ipcRenderer.invoke('tts:speak', text, voice)
+    ipcRenderer.invoke('tts:speak', text, voice),
+
+  toggleOverlay: (): Promise<boolean> => ipcRenderer.invoke('overlay:toggle'),
+  isOverlayOpen: (): Promise<boolean> => ipcRenderer.invoke('overlay:is-open'),
+  sendOverlayLine: (line: { id: number; src: string; dst: string | null }): void =>
+    ipcRenderer.send('overlay:line', line),
+  closeOverlay: (): void => ipcRenderer.send('overlay:close'),
+  onOverlayLine: (cb: (line: { id: number; src: string; dst: string | null }) => void): void => {
+    ipcRenderer.on('overlay:line', (_e, line) => cb(line))
+  }
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

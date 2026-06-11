@@ -157,6 +157,13 @@ body {
   gap: 16px;
 }
 
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .card h2,
 .settings h2,
 .subtitles-header h2 {
@@ -430,6 +437,86 @@ body {
 .subtitle-dst-error {
   font-size: 0.8rem;
   color: #ef9a9a;
+}
+
+/* ===== Overlay oynasi ===== */
+
+body.overlay-mode {
+  background: transparent;
+  overflow: hidden;
+}
+
+.overlay-root {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 10px 16px 14px;
+  -webkit-app-region: drag; /* butun oyna surish uchun */
+  border-radius: 14px;
+  background: rgba(10, 12, 16, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.overlay-root:hover {
+  background: rgba(10, 12, 16, 0.72);
+}
+
+.overlay-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 0.75rem;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.overlay-root:hover .overlay-close {
+  opacity: 1;
+}
+
+.overlay-close:hover {
+  background: rgba(239, 83, 80, 0.8);
+}
+
+.overlay-content {
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.overlay-src {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.overlay-dst {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.4;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+}
+
+.overlay-waiting {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.5);
+  padding-bottom: 14px;
 }
 
 /* ===== Scrollbar ===== */

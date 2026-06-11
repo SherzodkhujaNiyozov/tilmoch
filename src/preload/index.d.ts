@@ -18,6 +18,11 @@ declare global {
       ) => Promise<{ ok: boolean; text: string; error?: string }>
       listTtsVoices: () => Promise<{ name: string; locale: string; gender: string }[]>
       speak: (text: string, voice: string) => Promise<Uint8Array>
+      toggleOverlay: () => Promise<boolean>
+      isOverlayOpen: () => Promise<boolean>
+      sendOverlayLine: (line: { id: number; src: string; dst: string | null }) => void
+      closeOverlay: () => void
+      onOverlayLine: (cb: (line: { id: number; src: string; dst: string | null }) => void) => void
     }
   }
 }

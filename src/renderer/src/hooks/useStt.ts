@@ -72,6 +72,7 @@ export function useStt(stream: MediaStream | null, options?: SttOptions): SttSta
         window.api
           .translate(text, optsRef.current?.targetLang)
           .then((r) => {
+            if (r.ok) window.api.sendOverlayLine({ id, src: text, dst: r.text })
             setLines((prev) =>
               prev.map((l) =>
                 l.id === id
@@ -94,6 +95,7 @@ export function useStt(stream: MediaStream | null, options?: SttOptions): SttSta
           // O'z TTS ovozimizning qaytishi bo'lsa — e'tiborsiz qoldiramiz (loop himoyasi)
           if (isLikelyEcho(msg.text)) return
           const line: SubtitleLine = { id: nextId.current++, src: msg.text, dst: null, dstError: null }
+          window.api.sendOverlayLine({ id: line.id, src: line.src, dst: null })
           setLines((prev) => [...prev.slice(-19), line])
           translateLine(line.id, line.src)
         } else if (msg.type === 'error') {

@@ -6,6 +6,7 @@ import { registerSettingsIpc } from './settings'
 import { registerOllamaIpc } from './ollama'
 import { registerTtsIpc } from './tts'
 import { registerTranslateIpc } from './translate'
+import { registerOverlayIpc } from './overlay'
 import icon from '../../resources/icon.png?asset'
 
 // Must be called before app is ready — registers the loopback
@@ -67,6 +68,7 @@ app.whenReady().then(() => {
   registerOllamaIpc()
   registerTtsIpc()
   registerTranslateIpc()
+  registerOverlayIpc()
 
   createWindow()
 

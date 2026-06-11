@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import type { SystemAudioState } from '../hooks/useSystemAudio'
 import { SubtitleView } from './SubtitleView'
 
@@ -6,6 +7,15 @@ import { SubtitleView } from './SubtitleView'
  */
 export function VideoTab({ audio }: { audio: SystemAudioState }): React.JSX.Element {
   const { capturing, level, error, stream, start, stop } = audio
+  const [overlayOpen, setOverlayOpen] = useState(false)
+
+  useEffect(() => {
+    window.api.isOverlayOpen().then(setOverlayOpen)
+  }, [])
+
+  const toggleOverlay = async (): Promise<void> => {
+    setOverlayOpen(await window.api.toggleOverlay())
+  }
 
   return (
     <div className="tab-page">
@@ -18,15 +28,24 @@ export function VideoTab({ audio }: { audio: SystemAudioState }): React.JSX.Elem
               tahlil qilinib, pastda tarjima qilinadi.
             </p>
           </div>
-          {capturing ? (
-            <button className="btn btn-stop" onClick={stop}>
-              ■ Toʻxtatish
+          <div className="card-actions">
+            <button
+              className={`btn-voice ${overlayOpen ? 'on' : ''}`}
+              onClick={toggleOverlay}
+              title="Video ustida ko'rinadigan subtitle oynasi"
+            >
+              {overlayOpen ? '🗗 Overlay yoniq' : '🗗 Overlay'}
             </button>
-          ) : (
-            <button className="btn btn-start" onClick={start}>
-              ▶ Boshlash
-            </button>
-          )}
+            {capturing ? (
+              <button className="btn btn-stop" onClick={stop}>
+                ■ Toʻxtatish
+              </button>
+            ) : (
+              <button className="btn btn-start" onClick={start}>
+                ▶ Boshlash
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="meter-track">

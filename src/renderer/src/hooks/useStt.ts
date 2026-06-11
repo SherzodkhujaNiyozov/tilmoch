@@ -2,18 +2,6 @@ import { useEffect, useState } from 'react'
 
 const STT_URL = 'ws://127.0.0.1:8765'
 
-// AudioWorklet: 128-sample Float32 freymlarni main thread'ga uzatadi.
-const WORKLET_CODE = `
-class PCMProcessor extends AudioWorkletProcessor {
-  process(inputs) {
-    const ch = inputs[0] && inputs[0][0]
-    if (ch) this.port.postMessage(ch.slice(0))
-    return true
-  }
-}
-registerProcessor('pcm', PCMProcessor)
-`
-
 export interface SttState {
   status: 'idle' | 'connecting' | 'ready' | 'error'
   error: string | null
@@ -74,11 +62,9 @@ export function useStt(stream: MediaStream | null): SttState {
       }
 
       // 16kHz kontekst — brauzer o'zi resample qiladi.
+      // Worklet alohida fayl (public/pcm-worklet.js): CSP blob: skriptlarga ruxsat bermaydi.
       audioCtx = new AudioContext({ sampleRate: 16000 })
-      const blob = new Blob([WORKLET_CODE], { type: 'application/javascript' })
-      const url = URL.createObjectURL(blob)
-      await audioCtx.audioWorklet.addModule(url)
-      URL.revokeObjectURL(url)
+      await audioCtx.audioWorklet.addModule('pcm-worklet.js')
       if (cancelled) return
 
       const source = audioCtx.createMediaStreamSource(stream)

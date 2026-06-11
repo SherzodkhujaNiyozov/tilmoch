@@ -203,3 +203,23 @@ body {
   font-size: 0.85rem;
   color: #66bb6a;
 }
+
+.model-select {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.btn-refresh {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--ev-c-gray-2);
+  background: var(--ev-c-black-soft);
+  color: var(--ev-c-text-1);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.btn-refresh:hover {
+  background: var(--ev-c-gray-3);
+}

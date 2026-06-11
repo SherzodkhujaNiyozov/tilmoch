@@ -15,8 +15,10 @@ initAudioLoopback()
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: 980,
+    height: 740,
+    minWidth: 720,
+    minHeight: 560,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),

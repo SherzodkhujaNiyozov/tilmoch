@@ -113,7 +113,7 @@ export function MeetingPanel(): React.JSX.Element {
   return (
     <div className="settings">
       <div className="subtitles-header">
-        <h2>⬆️ Chiquvchi tarjima — sizning gapingiz (meeting)</h2>
+        <h2>Meeting rejimi — sizning gapingiz suhbatdosh tilida</h2>
         {micStream && (
           <span className={`stt-status stt-${status}`}>
             {speaking ? '🔊 Tarjima yuborilmoqda…' : status === 'ready' ? '🎙️ Gapiravering' : '…'}

@@ -9,6 +9,7 @@ export interface MeetingSettings {
   myLang: string // men gapiradigan til
   partnerLang: string // suhbatdosh eshitadigan til
   outputDeviceId: string // TTS chiqadigan qurilma (virtual cable), '' = default
+  micDeviceId: string // tanlangan mikrofon, '' = default
 }
 
 export interface AppSettings {
@@ -48,6 +49,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   meeting: {
     myLang: 'uz',
     partnerLang: 'en',
-    outputDeviceId: ''
+    outputDeviceId: '',
+    micDeviceId: ''
   }
 }

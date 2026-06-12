@@ -21,7 +21,6 @@ export function MeetingPanel(): React.JSX.Element {
   const [micStream, setMicStream] = useState<MediaStream | null>(null)
   const [outputs, setOutputs] = useState<AudioDevice[]>([])
   const [mics, setMics] = useState<AudioDevice[]>([])
-  const [micId, setMicId] = useState('')
   const [voice, setVoice] = useState('')
   const [micError, setMicError] = useState<string | null>(null)
   const [installing, setInstalling] = useState(false)
@@ -116,7 +115,9 @@ export function MeetingPanel(): React.JSX.Element {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
-          ...(micId && { deviceId: { exact: micId } }),
+          ...(settings?.meeting.micDeviceId && {
+            deviceId: { exact: settings.meeting.micDeviceId }
+          }),
           echoCancellation: true,
           noiseSuppression: true
         }
@@ -184,7 +185,11 @@ export function MeetingPanel(): React.JSX.Element {
         <div className="stage-row">
           <label>{t('meeting.mic')}</label>
           <div className="model-select">
-            <select value={micId} onChange={(e) => setMicId(e.target.value)} disabled={!!micStream}>
+            <select
+              value={settings.meeting.micDeviceId}
+              onChange={(e) => updateMeeting({ micDeviceId: e.target.value })}
+              disabled={!!micStream}
+            >
               <option value="">{t('meeting.micDefault')}</option>
               {mics.map((m) => (
                 <option key={m.id} value={m.id}>

@@ -4,6 +4,13 @@
 
 No subscriptions. No cloud lock-in. Your audio never leaves your machine unless *you* choose a cloud provider.
 
+## Demo
+
+<!-- DEMO GIF: docs/demo.gif joylang va quyidagi qatorni oching -->
+<!-- ![Tilmoch demo — live subtitle translation over a YouTube video](docs/demo.gif) -->
+
+> 🎬 Demo GIF coming soon — live bilingual subtitles over a YouTube video, with the cinema-style overlay.
+
 ---
 
 ## How it works

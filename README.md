@@ -1,140 +1,178 @@
-# Tilmoch 🗣️→🌍
+<div align="center">
 
-**Tilmoch** (Uzbek for *"interpreter"*) is a free, local-first real-time speech translator for your desktop. It captures any audio playing on your computer — YouTube videos, podcasts, online lectures, movies, or your meeting partner — transcribes it with a local Whisper model, translates it, and reads the translation aloud with a natural neural voice. In **Meeting mode** it works the other way too: you speak your language, and your Zoom/Meet partner hears theirs.
+# Tilmoch
 
-No subscriptions. No cloud lock-in. Your audio never leaves your machine unless *you* choose a cloud provider.
+**Real-time speech translation for your desktop**
 
-## Demo
+*Tilmoch (тилмоч) — Uzbek for "interpreter"*
 
-<!-- DEMO GIF: docs/demo.gif joylang va quyidagi qatorni oching -->
-<!-- ![Tilmoch demo — live subtitle translation over a YouTube video](docs/demo.gif) -->
+[![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red?style=flat-square)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-blue?style=flat-square)](#requirements)
+[![Electron](https://img.shields.io/badge/Electron-39-47848F?style=flat-square&logo=electron&logoColor=white)](https://www.electronjs.org/)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
+[![Release](https://img.shields.io/github/v/release/SherzodkhujaNiyozov/tilmoch?style=flat-square&color=4fc3f7)](https://github.com/SherzodkhujaNiyozov/tilmoch/releases)
 
-> 🎬 Demo GIF coming soon — live bilingual subtitles over a YouTube video, with the cinema-style overlay.
+<br/>
+
+Capture any audio from your computer. Transcribe it locally with Whisper. Translate it. Hear it — instantly.<br/>
+No subscription. No cloud lock-in. Your audio never leaves your machine.
+
+<br/>
+
+<!-- DEMO GIF: record a demo and place at docs/demo.gif, then uncomment the line below -->
+<!-- ![Tilmoch — live bilingual subtitle overlay over a YouTube video](docs/demo.gif) -->
+
+> **Demo GIF coming soon** — live bilingual subtitles over a YouTube video with the cinema-style overlay.
+
+</div>
 
 ---
 
 ## How it works
 
 ```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐    ┌──────────────┐
-│  System audio /  │    │  Speech-to-Text  │    │   Translation   │    │ Text-to-Speech│
-│  microphone      │ →  │  faster-whisper  │ →  │  Google free /  │ →  │  Edge TTS     │
-│  (driverless)    │    │  (local, GPU/CPU)│    │  Ollama / paid  │    │  (free, neural)│
-└─────────────────┘    └──────────────────┘    └─────────────────┘    └──────────────┘
+  System audio / mic          STT                    Translation              TTS
+ ┌──────────────────┐   ┌─────────────────┐   ┌──────────────────┐   ┌────────────────┐
+ │  Any app audio   │   │  faster-whisper  │   │  Google / Ollama │   │   Edge TTS     │
+ │  or microphone   │──▶│  local GPU/CPU  │──▶│  DeepL / OpenAI  │──▶│  virtual cable │
+ │  (driverless)    │   │  large-v3-turbo  │   │  (your choice)   │   │  or speakers   │
+ └──────────────────┘   └─────────────────┘   └──────────────────┘   └────────────────┘
 ```
 
-Every stage is **pluggable** — pick a provider per stage in Settings, drop in an API key for paid ones, or stay 100% free.
+Every stage is **independently pluggable** — pick a provider per stage in Settings. Stay 100% free with local models, or drop in an API key to unlock paid quality.
+
+---
 
 ## Features
 
-- ✅ **Video translation** — capture system audio with one click (no drivers), live bilingual subtitles
-- ✅ **Subtitle overlay** — transparent always-on-top cinema-style subtitle window, draggable, works over fullscreen video
-- ✅ **Spoken translation** — translations read aloud with neural Edge TTS voices, with echo-loop protection
-- ✅ **Meeting mode** — speak your language; your partner hears theirs through a virtual cable
-- ✅ **Guided VB-Cable setup** — one-click download + install from inside the app, auto-selected when detected
-- ✅ **Local GPU speech-to-text** — faster-whisper with CUDA (bundled via pip wheels), CPU fallback
-- ✅ **Self-managing STT server** — the app spawns, monitors, and restarts the Python server automatically
-- ✅ **Pluggable pipeline** — per-stage provider/model selection, automatic Ollama model discovery
-- ✅ **5 UI languages** — Uzbek, English, Russian, Japanese, Spanish (i18next)
-- ✅ **Echo protection** — self-echo text filter + TTS gating prevent feedback loops
-- 🔜 Packaged installer
+| | |
+|---|---|
+| **Video translation** | Capture system audio with one click — no drivers, no virtual cable. Live bilingual subtitles appear in real-time. |
+| **Subtitle overlay** | Transparent, always-on-top subtitle window. Works over fullscreen video, draggable to any position. |
+| **Spoken translation** | Translations read aloud via neural Edge TTS voices. Three-layer echo-loop protection prevents feedback. |
+| **Meeting mode** | You speak your language; your Zoom / Google Meet partner hears theirs — routed through a virtual audio cable. |
+| **Local GPU STT** | faster-whisper with CUDA 12 (bundled via pip wheels — no system CUDA install). Automatic CPU fallback. |
+| **Guided VB-Cable setup** | One-click download + elevated install from inside the app. Auto-detected and auto-selected when present. |
+| **Self-managing server** | The app spawns, monitors, and restarts the Python STT server automatically. No extra terminal needed. |
+| **Pluggable pipeline** | Per-stage provider and model selection. Ollama model list is discovered automatically via `/api/tags`. |
+| **5 UI languages** | Uzbek · English · Russian · Japanese · Spanish (i18next, persisted across sessions). |
+
+---
 
 ## Requirements
 
-| Component | Minimum | Recommended |
+| | Minimum | Recommended |
 |---|---|---|
-| OS | Windows 10+ / macOS 12.3+ / Linux (PipeWire) | Windows 11 |
-| Node.js | 18+ | 20+ |
-| Python | 3.10+ | 3.12+ |
-| RAM | 8 GB | 16 GB |
-| GPU | none (CPU fallback) | NVIDIA, 4 GB+ VRAM (CUDA 12) |
-| [Ollama](https://ollama.com/download) | optional (for local translation) | latest |
+| **OS** | Windows 10 · macOS 12.3 · Linux (PipeWire) | Windows 11 |
+| **Node.js** | 18 | 20 LTS |
+| **Python** | 3.10 | 3.12 |
+| **RAM** | 8 GB | 16 GB |
+| **GPU** | — (CPU fallback works) | NVIDIA with 4 GB+ VRAM (CUDA 12) |
+| **Ollama** | Optional — for local offline translation | [Latest](https://ollama.com/download) |
 
-## Setup
+---
+
+## Quick start
 
 ```bash
-# 1. Clone and install
+# 1. Clone and install JS dependencies
 git clone https://github.com/SherzodkhujaNiyozov/tilmoch.git
 cd tilmoch
 npm install
 
-# 2. Python STT environment (one time)
+# 2. Set up the Python STT environment (one-time)
 cd python
 python -m venv .venv
-.venv\Scripts\pip install -r requirements.txt    # Windows
+.venv\Scripts\pip install -r requirements.txt   # Windows
+# source .venv/bin/activate && pip install -r requirements.txt  # macOS/Linux
 cd ..
 
-# 3. Optional: local translation model
+# 3. (Optional) Pull a local translation model
 ollama pull gemma3:4b
 
-# 4. Run — the app starts the STT server automatically
+# 4. Launch — the STT server starts automatically
 npm run dev
 ```
 
-> **First run:** the Whisper model (~1.5 GB for `large-v3-turbo`) downloads automatically on first transcription. The NVIDIA CUDA runtime comes from pip wheels — no system CUDA install needed.
+> **First run note:** the Whisper `large-v3-turbo` model (~1.5 GB) downloads on first transcription. The NVIDIA CUDA runtime is installed via pip wheels — no separate CUDA toolkit required.
 
-## Which model should I pick? (honest recommendations)
+---
 
-### Speech-to-Text — local Whisper (free)
+## Model recommendations
 
-| Model | VRAM (int8) | Verdict |
+### Speech-to-Text
+
+| Model | VRAM (int8) | Notes |
 |---|---|---|
-| **`large-v3-turbo`** ⭐ | ~2.7 GB | **Best free STT, period.** Fits 4 GB GPUs, 2.5× faster than real-time. Use this unless your hardware can't. |
-| `distil-large-v3` | ~1.5 GB | Nearly as good for English-heavy content |
-| `small` | ~0.5 GB | CPU-only machines; noticeably more errors |
+| **`large-v3-turbo`** ⭐ | ~2.7 GB | Best free STT available. 2.5× faster than real-time. Use this by default. |
+| `distil-large-v3` | ~1.5 GB | Near-identical quality for English-heavy content. |
+| `small` | ~0.5 GB | CPU-only machines — noticeably more transcription errors. |
 
-Paid alternatives (**OpenAI** `gpt-4o-transcribe`, **Deepgram** `nova-3`) are supported via API key. They're worth it only if you have **no GPU** — on a CUDA machine, local `large-v3-turbo` matches them at zero cost. Deepgram is the latency king (~$0.0077/min) if you ever need cloud streaming.
+Cloud alternatives (`gpt-4o-transcribe`, `deepgram nova-3`) are supported via API key — but on a CUDA machine, `large-v3-turbo` matches them at zero cost. Deepgram (`$0.0077/min`) is the best latency option if you ever need cloud streaming.
 
 ### Translation
 
-| Provider | Cost | Verdict |
+| Provider | Cost | Best for |
 |---|---|---|
-| **Google Translate (free endpoint)** ⭐ | Free, no key | **Best free choice for low-resource languages** (Uzbek, etc.). Unofficial endpoint — may be rate-limited someday; the app falls back gracefully. |
-| **Ollama `gemma3:4b`** ⭐ | Free, local | **Best fully-offline choice.** Excellent for major languages (RU/JA/ES…); mediocre for Uzbek. 140+ languages, fits 4 GB VRAM. |
-| Ollama `qwen2.5:3b` / `qwen3:4b` | Free, local | Strong for Japanese/Chinese/Korean; **do not use for Uzbek** (produces garbage) |
-| DeepL API | Free tier 500k chars/mo (card required) | **Best quality for European languages**; weak/no Uzbek support |
-| OpenAI `gpt-4o-mini` | ~$0.15/M input tokens | **Best context-aware paid option** — understands idioms, slang, mid-sentence corrections. The pick if you pay for one thing. |
+| **Google Translate (free)** ⭐ | Free, no key | Low-resource languages (Uzbek, etc.). Uses the unofficial endpoint — the app handles rate-limiting gracefully. |
+| **Ollama `gemma3:4b`** ⭐ | Free, local | Fully offline. Excellent for major languages (Russian, Japanese, Spanish, etc.). Mediocre for Uzbek — use Google instead. |
+| `qwen2.5:3b` / `qwen3:4b` | Free, local | Strong for CJK languages. **Do not use for Uzbek** — produces incorrect output. |
+| DeepL API | Free tier 500k chars/mo | Best quality for European languages. Weak Uzbek support. |
+| OpenAI `gpt-4o-mini` | ~$0.15/M tokens | Best context-aware paid option — handles idioms, slang, mid-sentence corrections. |
 
-**Rule of thumb:** target language is Uzbek → Google free. Major language + want offline → `gemma3:4b`. Want the absolute best and will pay → OpenAI `gpt-4o-mini` (cheap) or `gpt-4o` (premium).
+> Avoid "thinking" models like `deepseek-r1` for translation — the reasoning pass kills real-time latency.
 
-> Avoid "thinking" models (`deepseek-r1`) for translation — they reason before answering, killing real-time latency.
+**Rule of thumb:** Uzbek target → Google free. Major language + offline → `gemma3:4b`. Best possible quality → `gpt-4o-mini`.
 
 ### Text-to-Speech
 
-| Provider | Cost | Verdict |
+| Provider | Cost | Notes |
 |---|---|---|
-| **Edge TTS** ⭐ | Free | **Best free TTS by far** — neural quality, hundreds of voices, excellent Japanese, includes Uzbek (`uz-UZ-MadinaNeural`). Needs internet; unofficial API. |
-| ElevenLabs | from $5/mo | **Best paid quality + voice cloning** — keep your own voice timbre across languages. The upgrade that matters most for Meeting mode. |
+| **Edge TTS** ⭐ | Free | Neural quality, 400+ voices, includes `uz-UZ-MadinaNeural`. Needs internet. |
+| ElevenLabs | From $5/mo | Best quality + voice cloning. Most impactful paid upgrade for Meeting mode. |
 
-## Using Meeting mode (Zoom/Google Meet)
+---
 
-1. Open the **Meeting** tab, pick your language and your partner's language
-2. If VB-Cable isn't installed, click **Install VB-Cable** — the app downloads and launches the official installer (confirm the UAC prompt)
-3. The app auto-selects **CABLE Input** as TTS output once detected
-4. In Zoom/Meet, set **Microphone → CABLE Output**
-5. Click **Start meeting mode** and speak — your partner hears the translation in their language
-6. To understand *them*, also start **Video translation** (incoming) — their voice gets subtitled and optionally spoken to you. Wear headphones.
+## Meeting mode setup (Zoom / Google Meet)
+
+Meeting mode lets you speak your language while your partner hears theirs in real-time.
+
+1. Open the **Meeting** tab and select your language and your partner's language.
+2. If VB-Cable is not installed, click **Install VB-Cable** — the app downloads the official package and launches the installer. Approve the UAC prompt.
+3. The app automatically selects **CABLE Input** as the TTS output device once it detects the cable.
+4. In Zoom or Google Meet, set your **Microphone to CABLE Output**.
+5. Click **Start** and speak. Your partner hears the translation.
+6. To understand your partner in return, also enable **Video translation** on the Video tab. Use headphones to prevent echo.
+
+---
 
 ## Troubleshooting
 
-| Problem | Fix |
+| Symptom | Solution |
 |---|---|
-| Ollama models not listed | Make sure Ollama is running (`ollama list`). If the tray app is stuck, quit it from the tray and reopen, then press **↻**. |
-| STT status stuck on "connecting" | The app respawns the server automatically — wait ~5s. Check the dev console for `[stt]` logs. |
-| First transcription very slow | One-time Whisper model download (~1.5 GB). |
-| GPU not used | Server logs `CUDA'da yuklandi` (GPU) or `CPU'da yuklandi` (fallback) on model load. |
-| CABLE Input not visible after install | Press **↻**; if still missing, restart the app (rarely, Windows needs a reboot). |
-| Partner hears the original + translation | Make sure Zoom mic is **CABLE Output**, not your real microphone. |
+| Ollama models not listed | Confirm Ollama is running (`ollama list`). If the tray icon is stuck, quit and restart Ollama, then press **↻** in the app. |
+| STT status stuck on "connecting" | The app respawns the server automatically — wait ~5 s. Open DevTools and check `[stt]` logs. |
+| First transcription is slow | One-time Whisper model download (~1.5 GB). Subsequent starts are instant. |
+| GPU not used | On model load the server logs either `CUDA'da yuklandi` (GPU) or `CPU'da yuklandi` (fallback). |
+| CABLE Input missing after install | Press **↻** to refresh devices. If still missing, restart the app. Rarely, Windows requires a reboot. |
+| Partner hears original + translation | Your Zoom microphone must be set to **CABLE Output**, not your physical microphone. |
+
+---
 
 ## Tech stack
 
-- **App**: Electron 39 + React 19 + TypeScript + electron-vite + i18next
-- **Audio capture**: [`electron-audio-loopback`](https://github.com/alectrocute/electron-audio-loopback) (driverless system loopback)
-- **STT**: [`faster-whisper`](https://github.com/SYSTRAN/faster-whisper) (CTranslate2) over WebSocket, auto-spawned Python server
-- **Translation**: Google Translate (free endpoint) / [Ollama](https://ollama.com) / DeepL / OpenAI
-- **TTS**: [`msedge-tts`](https://github.com/Migushthe2nd/MsEdgeTTS) (Microsoft Edge neural voices)
-- **Design**: custom design system built with Claude Design (brand mark, tokens, motion specs)
+| Layer | Technology |
+|---|---|
+| Desktop shell | Electron 39 + electron-vite |
+| UI | React 19 + TypeScript + i18next |
+| Audio capture | [`electron-audio-loopback`](https://github.com/alectrocute/electron-audio-loopback) — driverless WASAPI loopback |
+| STT | [`faster-whisper`](https://github.com/SYSTRAN/faster-whisper) (CTranslate2) via WebSocket, Python subprocess |
+| Translation | Google Translate (free) · [Ollama](https://ollama.com) · DeepL · OpenAI |
+| TTS | [`msedge-tts`](https://github.com/Migushthe2nd/MsEdgeTTS) — Microsoft Edge neural voices |
+| Design | Custom token-based design system — surface ramp, Inter, motion specs |
+
+---
 
 ## License
 
-All rights reserved. This is a personal portfolio project — feel free to read the code and learn from it, but please contact the author before reusing it commercially.
+All rights reserved. This is a personal portfolio project. You are welcome to read and learn from the source code, but please contact the author before any commercial use or redistribution.
